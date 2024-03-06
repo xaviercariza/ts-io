@@ -1,0 +1,36 @@
+{
+  "name": "@tsio/core",
+  "description": "Core package of tsio",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Xavier Cardona",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
+    "types-check": "tsc --noemit",
+    "lint": "eslint .",
+    "lint:fix": "pnpm run lint --fix"
+  },
+  "devDependencies": {
+    "@tsio/eslint-config": "workspace:^",
+    "@tsio/typescript-config": "workspace:^",
+    "@types/node": "^20.11.24",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^8.57.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.2",
+    "zod": "^3.22.4"
+  },
+  "dependencies": {
+    "pipe-ts": "^0.0.9",
+    "uuid": "^9.0.1"
+  },
+  "peerDependencies": {
+    "zod": "^3.22.4"
+  }
+}

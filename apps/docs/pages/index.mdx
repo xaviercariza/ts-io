@@ -1,0 +1,79 @@
+# Introduction
+
+tsio simplifies the process of managing client-server interactions by providing a comprehensive framework for WebSocket communication.
+
+The core concept are `Contracts`, which serve as blueprints defining the structure, behavior, and expectations of WebSocket APIs. Through the definition of structured actions and listeners, tsio Contracts establish clear communication channels between clients and servers, fostering a seamless exchange of real-time events. These contracts, are built on top of Zod schemas, ensuring robust runtime type checks, safeguarding data integrity and consistency throughout every interaction.
+
+In addition to Contracts, tsio offers seamless server integration, empowering developers to effortlessly handle incoming actions and orchestrate server-side logic. By defining action handlers, developers can specify how the server responds to client requests, facilitating efficient data processing and event propagation.
+
+## Simple example
+
+Create a Contract
+
+```typescript filename="post-contract.ts" copy
+const PostSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  body: z.string(),
+})
+
+const c = initContract()
+
+const postContract = c.actions({
+  actions: {
+    createPost: {
+      input: PostSchema.omit({ id: true }),
+      response: PostSchema,
+    },
+  },
+  listeners: {
+    onPostCreated: {
+      data: PostSchema,
+    },
+  },
+})
+```
+
+Initialize tsio server integration
+
+```typescript filename="server.ts" copy
+const s = initServer({
+  userId: user.id,
+})
+const postActions = s.actions(postContract, {
+  createPost: {
+    handler: ({ input, ctx, emitEventTo }) => {
+      const { title, body } = input
+
+      const newPost = {
+        id: 'post-1',
+        title,
+        body,
+      }
+
+      return { success: true, data: newPost }
+    },
+  },
+})
+```
+
+Apply socket events:
+
+```typescript filename="client.ts" copy
+applySocketEvents(socket, postContract, postActions)
+```
+
+Consume the websocket api on the client with a RPC-like interface:
+
+```typescript filename="client.ts" copy
+const client = initClient(clientSocket, postContract)
+
+client.listeners.onPostCreated(newPost => {
+  // Fully typed! --^
+})
+
+const res = await client.actions.createPost({
+  title: 'tsio!', // Fully typed! --^
+  body: 'Is awesome!',
+})
+```

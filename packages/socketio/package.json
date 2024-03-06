@@ -1,0 +1,49 @@
+{
+  "name": "@tsio/socketio",
+  "description": "Socket.io adapters for tsio",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Xavier Cardona",
+  "version": "0.0.0",
+  "exports": {
+    "./package.json": "./package.json",
+    "./client": {
+      "import": "./dist/client.mjs",
+      "require": "./dist/client.js",
+      "types": "./dist/client.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.js",
+      "types": "./dist/server.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
+    "types-check": "tsc --noemit",
+    "lint": "eslint .",
+    "lint:fix": "pnpm run lint --fix"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@tsio/eslint-config": "workspace:^",
+    "@tsio/core": "workspace:^",
+    "@tsio/typescript-config": "workspace:^",
+    "@types/node": "^20.11.24",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^8.57.0",
+    "socket.io": "^4.7.4",
+    "socket.io-client": "^4.7.4",
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.2"
+  },
+  "peerDependencies": {
+    "@tsio/core": "workspace:^",
+    "socket.io": "^4.7.4",
+    "socket.io-client": "^4.7.4"
+  }
+}

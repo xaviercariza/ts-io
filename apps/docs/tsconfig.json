@@ -1,0 +1,23 @@
+{
+  "extends": "@tsio/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "incremental": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "theme.config.jsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

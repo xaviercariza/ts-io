@@ -1,0 +1,47 @@
+{
+  "name": "@tsio/ws",
+  "description": "WS adapters for tsio",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Xavier Cardona",
+  "version": "0.0.0",
+  "exports": {
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "require": "./dist/client.js",
+      "import": "./dist/client.mjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "require": "./dist/server.js",
+      "import": "./dist/server.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
+    "types-check": "tsc --noemit",
+    "lint": "eslint .",
+    "lint:fix": "pnpm run lint --fix"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@tsio/eslint-config": "workspace:^",
+    "@tsio/core": "workspace:^",
+    "@tsio/typescript-config": "workspace:^",
+    "@types/node": "^20.11.24",
+    "@types/uuid": "^9.0.8",
+    "@types/ws": "^8.5.10",
+    "eslint": "^8.57.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.2",
+    "ws": "^8.16.0"
+  },
+  "peerDependencies": {
+    "@tsio/core": "workspace:^",
+    "ws": "^8.16.0"
+  }
+}

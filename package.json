@@ -1,0 +1,30 @@
+{
+  "name": "root",
+  "private": true,
+  "packageManager": "pnpm@7.15.0",
+  "repository": "https://github.com/xaviercariza/tsio",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "prettier": "turbo run prettier --",
+    "types-check": "turbo run types-check --",
+    "lint": "turbo lint",
+    "lint:fix": "turbo run lint:fix -- --max-warnings=0 ",
+    "clean": "turbo clean && npm run clean:local",
+    "clean:local": "find . -type d \\( -name '*node_modules*' -or -name '*turbo*' -or -name '*dist*' \\) -exec rm -rf {} \\; || true",
+    "release": "pnpm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@tsio/eslint-config": "workspace:*",
+    "@tsio/typescript-config": "workspace:*",
+    "@turbo/gen": "^1.9.7",
+    "eslint": "^8.57.0",
+    "husky": "^9.0.10",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "turbo": "^1.12.4",
+    "typescript": "^5.4.2"
+  }
+}

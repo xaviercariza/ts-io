@@ -1,0 +1,142 @@
+import { Callout } from 'nextra/components'
+
+# Contract
+
+In the realm of WebSocket-based APIs, maintaining clarity, consistency, and type safety is essential. Contracts, built on top of Zod schemas, serve as the fundamental building blocks defining the structure, behavior, and expectations of your WebSocket API.
+
+Actions defined in a contract enable clients to trigger operations on the server, while listeners facilitate
+real-time event-driven interactions. Together, they provide a structured and robust framework for orchestrating
+seamless communication between clients and servers in WebSocket applications, all while ensuring end-to-end
+type safety
+
+```typescript filename="post-contract.ts" copy
+const c = initContract()
+
+const PostSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+})
+
+export const postContract = c.actions({
+  actions: {
+    createPost: {
+      input: PostSchema.omit({ id: true }),
+      response: PostSchema,
+    },
+  },
+  listeners: {
+    onPostCreated: {
+      data: PostSchema,
+    },
+  },
+})
+```
+
+Contracts in tsio offer a range of advantages tailored specifically for WebSocket APIs:
+
+1. **Clarity and Understanding**: With tsio Contracts, developers gain a clear and concise understanding of WebSocket actions and listeners. These contracts define the available functionalities and the expected data structures with precision.
+
+2. **Type Safety**: Leveraging Zod schemas, tsio Contracts enforce strict typing, ensuring that data passed through actions and listeners adheres to predefined schemas. This stringent type validation eliminates runtime errors and enhances code reliability, even in real-time communication scenarios.
+
+3. **Enhanced Documentation**: tsio Contracts serve as living documentation for your WebSocket API, providing comprehensive insights into its capabilities and usage patterns. Developers can refer to these contracts to understand WebSocket events and associated data schemas, facilitating smooth integration into their applications.
+
+4. **Facilitated Development**: By utilizing tsio Contracts, developers can seamlessly integrate WebSocket APIs into their applications without worrying about data validation and type coercion. This streamlines the development process and minimizes the likelihood of bugs, especially in asynchronous communication scenarios.
+
+5. **Maintainability and Scalability**: tsio Contracts promote consistency across different versions and implementations of your WebSocket API. As requirements evolve, developers can modify contracts to accommodate changes while ensuring backward compatibility, crucial for real-time applications.
+
+6. **Improved Collaboration**: Acting as a common language for communication between frontend and backend developers, tsio Contracts foster collaboration and alignment throughout the development lifecycle, especially in WebSocket-driven applications.
+
+7. **Code Generation and Tooling**: tsio Contracts enable the automatic generation of client-side code and documentation, reducing boilerplate code and accelerating development efforts. With Zod's robust schema validation and code generation capabilities, tsio Contracts streamline contract-based development for WebSocket APIs.
+
+In summary, tsio Contracts play a pivotal role in modern WebSocket API development, promoting clarity, type safety, and collaboration. By leveraging Zod schemas within the tsio framework, developers can build robust, maintainable, and scalable real-time applications with confidence.
+
+The following documentation elaborates on how tsio Contracts can be utilized to define and interact with WebSocket APIs, focusing on actions and listeners for real-time communication.
+
+## Understanding Actions and Listeners
+
+In the context of tsio, actions and listeners are the primary mechanisms through which clients interact with the WebSocket server. They encapsulate the communication flow and define the structure of data exchanged between the client and the server.
+
+### Actions
+
+Actions within tsio serve as the means by which clients trigger operations on the server. These operations can range from simple data transmissions to complex computations, all orchestrated through the defined contracts.
+
+There are two primary categories of actions:
+
+#### Fire and Forget:
+
+Fire and forget actions represent operations where the client initiates an action on the server without expecting any immediate response. These actions are akin to tossing a message over a fence, where the client sends the data to the server but doesn't await any acknowledgment or response in return. In the contract, these actions don't have a response schema defined since the client doesn't anticipate any data coming back.
+
+#### Request-Response:
+
+On the other hand, actions that return a response to the client signify a more interactive form of communication. In this scenario, the client triggers an action on the server and expects a meaningful response back. It's akin to engaging in a conversation – you say something, and you anticipate a reply. In the contract, these actions have a response schema defined, specifying the structure of the data the client expects to receive from the server after executing the action.
+
+<Callout type="warning">
+  In request-response actions, the response goes directly to the client that triggered the action.
+  To notify other clients with a response, tsio offers `emitEventTo` in the server action handler.
+  This feature broadcasts responses to specific clients or groups.
+</Callout>
+
+When defining actions, several key components need to be considered:
+
+- **Action name**: This key serves as the unique identifier for the action within the object. It represents the name of the action and distinguishes it from other actions within the contract. It should be descriptive and indicative of the operation being performed.
+
+```typescript filename="post-contract.ts" {2} copy
+actions: {
+  createPost: {
+    ...
+  },
+}
+```
+
+Within each action, the following fields are defined, specifying the structure of data exchanged between the client and the server, utilizing Zod types:
+
+- **Input**: The input field specifies the data or payload sent by the client to the server when invoking the action. It typically includes parameters required for the server to execute the action accurately.
+
+```typescript filename="post-contract.ts" {3} copy
+actions: {
+  createPost: {
+    input: PostSchema.omit({ id: true }),
+    response: PostSchema,
+  },
+}
+```
+
+- **Response** (optional): If defined, the response field outlines the data returned by the server to the client upon executing the action.
+
+```typescript filename="post-contract.ts" {4} copy
+actions: {
+  createPost: {
+    input: PostSchema.omit({ id: true }),
+    response: PostSchema,
+  },
+}
+```
+
+<Callout type="info">
+  Action's responses are a discriminated union (`TResponse<Data>`). It can represent either a successful response containing data (`TSuccessResponse<Data>`) or an error response (`ErrorResponse`).
+</Callout>
+
+### Listeners
+
+Listeners enable clients to subscribe to specific events or updates emitted by the server. They facilitate real-time communication and event-driven interactions. Here's what you need to consider when defining listeners:
+
+- **Listener Name**: Similar to actions, the listener name provides a unique label for the event being listened to. It should accurately represent the type of event being observed, ensuring clarity and coherence in your WebSocket interactions.
+
+```typescript filename="post-contract.ts" {2} copy
+listeners: {
+  onPostCreated: {
+    ...
+  },
+},
+```
+
+- **Data**: The data field specifies the payload received by the client when the subscribed event occurs on the server. This payload typically contains information relevant to the event, allowing the client to react and respond accordingly.
+
+```typescript filename="post-contract.ts" {3} copy
+listeners: {
+  onPostCreated: {
+    data: PostSchema,
+  },
+},
+```
