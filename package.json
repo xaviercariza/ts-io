@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "check:types": "turbo run check:types",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "clean": "turbo clean && npm run clean:local",
+    "clean:local": "find . -type d \\( -name '*node_modules*' -or -name '*turbo*' -or -name '*dist*' \\) -exec rm -rf {} \\; || true"
+  },
+  "devDependencies": {
+    "@ts-io/eslint-config": "workspace:*",
+    "@ts-io/typescript-config": "workspace:*",
+    "@turbo/gen": "^1.9.7",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "turbo": "^1.12.4"
+  },
+  "packageManager": "pnpm@7.15.0",
+  "name": "test-lib"
+}
