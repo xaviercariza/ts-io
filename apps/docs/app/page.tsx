@@ -4,7 +4,7 @@ export default function Page() {
       <header>
         <h1>Docs</h1>
       </header>
-      <button>Button!</button>
+      <button type="button">Button!</button>
     </>
-  );
+  )
 }

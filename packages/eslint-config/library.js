@@ -31,6 +31,7 @@ module.exports = {
     'node_modules/',
     'dist/',
     'tsup.config.ts',
+    '.eslintrc.cjs',
   ],
   overrides: [
     {

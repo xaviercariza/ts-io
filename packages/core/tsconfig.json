@@ -1,5 +1,5 @@
 {
-  "extends": "tsconfig/library.json",
+  "extends": "@ts-io/typescript-config/library.json",
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
 }

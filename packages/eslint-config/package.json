@@ -4,8 +4,7 @@
   "private": true,
   "files": [
     "library.js",
-    "next.js",
-    "react-internal.js"
+    "next.js"
   ],
   "license": "MIT",
   "publishConfig": {
