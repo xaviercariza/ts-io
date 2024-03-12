@@ -2,11 +2,11 @@
   "name": "root",
   "private": true,
   "packageManager": "pnpm@7.15.0",
+  "repository": "https://github.com/xaviercariza/ts-io",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
-    "check:types": "turbo run check:types",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "clean": "turbo clean && npm run clean:local",
