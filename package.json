@@ -7,8 +7,10 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prettier": "turbo run prettier --",
+    "types-check": "turbo run types-check --",
+    "lint": "turbo lint",
+    "lint:fix": "turbo run lint:fix -- --max-warnings=0 ",
     "clean": "turbo clean && npm run clean:local",
     "clean:local": "find . -type d \\( -name '*node_modules*' -or -name '*turbo*' -or -name '*dist*' \\) -exec rm -rf {} \\; || true"
   },
@@ -17,8 +19,10 @@
     "@ts-io/typescript-config": "workspace:*",
     "@turbo/gen": "^1.9.7",
     "eslint": "^8.57.0",
+    "husky": "^9.0.10",
+    "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "turbo": "^1.12.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.2"
   }
 }

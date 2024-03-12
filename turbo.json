@@ -11,8 +11,10 @@
       "cache": false,
       "persistent": true
     },
+    "prettier": {},
+    "types-check": {},
     "lint": {},
-    "test": {},
-    "check:types": {}
+    "lint:fix": {},
+    "test": {}
   }
 }

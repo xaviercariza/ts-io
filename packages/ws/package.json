@@ -21,8 +21,10 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "check:types": "tsc --noemit",
-    "lint": "eslint ."
+    "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
+    "types-check": "tsc --noemit",
+    "lint": "eslint .",
+    "lint:fix": "pnpm run lint --fix"
   },
   "dependencies": {
     "uuid": "^9.0.1"
@@ -36,7 +38,7 @@
     "@types/ws": "^8.5.10",
     "eslint": "^8.57.0",
     "tsup": "^8.0.1",
-    "typescript": "^5.3.3",
+    "typescript": "^5.4.2",
     "ws": "^8.16.0"
   },
   "peerDependencies": {

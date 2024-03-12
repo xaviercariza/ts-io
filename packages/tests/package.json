@@ -4,9 +4,10 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "check:types": "tsc --noemit",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "npm run lint -- --fix",
+    "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
+    "types-check": "tsc --noemit",
+    "lint": "eslint .",
+    "lint:fix": "pnpm run lint --fix",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -20,7 +21,7 @@
     "@types/ws": "^8.5.10",
     "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4",
-    "typescript": "^5.3.3",
+    "typescript": "^5.4.2",
     "vitest": "^1.3.1",
     "vitest-mock-extended": "^1.3.1",
     "ws": "^8.16.0",

@@ -12,8 +12,10 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "check:types": "tsc --noemit",
-    "lint": "eslint ."
+    "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
+    "types-check": "tsc --noemit",
+    "lint": "eslint .",
+    "lint:fix": "pnpm run lint --fix"
   },
   "devDependencies": {
     "@ts-io/eslint-config": "workspace:^",
