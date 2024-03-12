@@ -1,0 +1,46 @@
+{
+  "name": "@ts-io/ws",
+  "description": "Native WebSocket adapters for ts-io",
+  "keywords": [],
+  "private": true,
+  "license": "MIT",
+  "author": "Xavier Cardona",
+  "version": "0.0.1",
+  "exports": {
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "require": "./dist/client.js",
+      "import": "./dist/client.mjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "require": "./dist/server.js",
+      "import": "./dist/server.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "check:types": "tsc --noemit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@ts-io/eslint-config": "workspace:^",
+    "@ts-io/core": "workspace:^",
+    "@ts-io/typescript-config": "workspace:^",
+    "@types/node": "^20.11.24",
+    "@types/uuid": "^9.0.8",
+    "@types/ws": "^8.5.10",
+    "eslint": "^8.57.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "ws": "^8.16.0"
+  },
+  "peerDependencies": {
+    "@ts-io/core": "workspace:^",
+    "ws": "^8.16.0"
+  }
+}

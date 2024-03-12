@@ -1,6 +1,5 @@
-import { Socket } from 'socket.io-client'
 import { z } from 'zod'
-import { Prettify, isBasicAction, isIoActionWithAck, isIoListener } from './type-utils'
+import { TsIoClientAdapter } from './adapter-types'
 import {
   IoActions,
   IoContract,
@@ -10,8 +9,7 @@ import {
   TBaseAction,
   TResponse,
 } from './types'
-
-type ClientSocket = Socket
+import { isBasicAction, isIoActionWithAck, isIoListener } from './type-utils'
 
 type BasicAction<Action extends TBaseAction> = (
   body: z.infer<Action['input']>
@@ -41,26 +39,17 @@ type RecursiveListenersProxyObj<Listeners extends IoListeners> = {
       : never
 }
 
-type IoClient<Contract extends IoContract> = {
-  actions: Contract['actions'] extends IoActions
-    ? RecursiveActionsProxyObj<Contract['actions']>
-    : never
-  listeners: Contract['listeners'] extends IoListeners
-    ? RecursiveListenersProxyObj<Contract['listeners']>
-    : never
-}
-
 const getBasicAction =
-  <TAction extends TBaseAction>(
-    socket: ClientSocket,
+  <TAction extends TBaseAction, Adapter extends TsIoClientAdapter<any>>(
+    adapter: Adapter,
     actionKey: keyof IoActions
   ): BasicAction<TAction> =>
   body => {
-    socket.emit(actionKey as any, body)
+    adapter.emit(actionKey as any, body)
   }
 const getActionWithAck =
-  <TAction extends TActionWithAck>(
-    socket: ClientSocket,
+  <TAction extends TActionWithAck, Adapter extends TsIoClientAdapter<any>>(
+    socket: Adapter,
     actionKey: keyof IoActions
   ): ActionWithAck<TAction> =>
   body => {
@@ -69,19 +58,28 @@ const getActionWithAck =
     })
   }
 
-const getListener = <Listener extends IoListener>(
-  socket: ClientSocket,
+const getListener = <Listener extends IoListener, Adapter extends TsIoClientAdapter<any>>(
+  adapter: Adapter,
   listenerKey: keyof IoListeners
 ): ListenerFunction<Listener> => {
   return callback => {
-    socket.on(listenerKey as any, callback)
+    adapter.on(listenerKey as any, callback)
   }
 }
 
-const initClient = <Contract extends IoContract>(
-  socket: ClientSocket,
+type TsIoClient<Contract extends IoContract> = {
+  actions: Contract['actions'] extends IoActions
+    ? RecursiveActionsProxyObj<Contract['actions']>
+    : never
+  listeners: Contract['listeners'] extends IoListeners
+    ? RecursiveListenersProxyObj<Contract['listeners']>
+    : never
+}
+
+const initNewClient = <Contract extends IoContract, Adapter extends TsIoClientAdapter<IoContract>>(
+  adapter: Adapter,
   contract: Contract
-): Prettify<IoClient<Contract>> => {
+): TsIoClient<Contract> => {
   return {
     actions:
       contract.actions &&
@@ -89,11 +87,11 @@ const initClient = <Contract extends IoContract>(
         Object.entries(contract.actions).map(([key, subContract]) => {
           const actionKey = key as keyof IoActions
           if (isIoActionWithAck(subContract)) {
-            return [key, getActionWithAck<typeof subContract>(socket, actionKey)]
+            return [key, getActionWithAck(adapter, actionKey)]
           } else if (isBasicAction(subContract)) {
-            return [key, getBasicAction<typeof subContract>(socket, actionKey)]
+            return [key, getBasicAction(adapter, actionKey)]
           } else {
-            return [key, initClient(socket, subContract)]
+            return [key, initNewClient(adapter, subContract)]
           }
         })
       ),
@@ -104,138 +102,14 @@ const initClient = <Contract extends IoContract>(
           if (isIoListener(subListener)) {
             const listenerKey = key as keyof IoListeners
 
-            return [key, getListener<typeof subListener>(socket, listenerKey)]
+            return [key, getListener(adapter, listenerKey)]
           } else {
-            return [key, initClient(socket, subListener)]
+            return [key, initNewClient(adapter, subListener)]
           }
         })
       ),
   }
 }
 
-export { initClient }
-export type { ClientSocket, IoClient, BasicAction, ActionWithAck, ListenerFunction }
-
-// import { Socket } from "socket.io-client";
-// import { z } from "zod";
-// import {
-//   Prettify,
-//   isBasicAction,
-//   isIoActionWithAck,
-//   isIoListener,
-// } from "./type-utils";
-// import {
-//   IoActions,
-//   IoContract,
-//   IoListener,
-//   IoListeners,
-//   TActionWithAck,
-//   TBaseAction,
-//   TResponse,
-// } from "./types";
-
-// type ClientSocket = Socket;
-
-// type BasicAction<Action extends TBaseAction> = (
-//   body: z.infer<Action["input"]>
-// ) => Promise<void> | void;
-
-// type ActionWithAck<Action extends TActionWithAck> = (
-//   body: z.infer<Action["input"]>,
-//   callback: (response: TResponse<z.infer<Action["response"]>>) => void
-// ) => Promise<void> | void;
-
-// type ListenerFunction<Listener extends IoListener> = (
-//   callback: (response: z.infer<Listener["data"]>) => void
-// ) => void;
-
-// type RecursiveActionsProxyObj<Actions extends IoActions> = {
-//   [Key in keyof Actions]: Actions[Key] extends IoActions
-//     ? RecursiveActionsProxyObj<Actions[Key]>
-//     : Actions[Key] extends TActionWithAck
-//     ? ActionWithAck<Actions[Key]>
-//     : BasicAction<Actions[Key]>;
-// };
-
-// type RecursiveListenersProxyObj<Listeners extends IoListeners> = {
-//   [ListenerKey in keyof Listeners]: Listeners[ListenerKey] extends IoListener
-//     ? ListenerFunction<Listeners[ListenerKey]>
-//     : Listeners[ListenerKey] extends IoListeners
-//     ? RecursiveListenersProxyObj<Listeners[ListenerKey]>
-//     : never;
-// };
-
-// type IoClient<Contract extends IoContract> = {
-//   actions: Contract["actions"] extends IoActions
-//     ? RecursiveActionsProxyObj<Contract["actions"]>
-//     : never;
-//   listeners: Contract["listeners"] extends IoListeners
-//     ? RecursiveListenersProxyObj<Contract["listeners"]>
-//     : never;
-// };
-
-// const getBasicAction =
-//   <TAction extends TBaseAction>(
-//     socket: ClientSocket,
-//     actionKey: keyof IoActions
-//   ): BasicAction<TAction> =>
-//   (body) => {
-//     socket.emit(actionKey as any, body);
-//   };
-// const getActionWithAck =
-//   <TAction extends TActionWithAck>(
-//     socket: ClientSocket,
-//     actionKey: keyof IoActions
-//   ): ActionWithAck<TAction> =>
-//   (body, callback) => {
-//     socket.emit(actionKey as any, body, callback);
-//   };
-
-// const getListener = <Listener extends IoListener>(
-//   socket: ClientSocket,
-//   listenerKey: keyof IoListeners
-// ): ListenerFunction<Listener> => {
-//   return (callback) => {
-//     socket.on(listenerKey as any, callback);
-//   };
-// };
-
-// const initClient = <Contract extends IoContract>(
-//   socket: ClientSocket,
-//   contract: Contract
-// ): Prettify<IoClient<Contract>> => {
-//   return {
-//     actions:
-//       contract.actions &&
-//       Object.fromEntries(
-//         Object.entries(contract.actions).map(([key, subContract]) => {
-//           const actionKey = key as keyof IoActions;
-//           if (isIoActionWithAck(subContract)) {
-//             return [
-//               key,
-//               getActionWithAck<typeof subContract>(socket, actionKey),
-//             ];
-//           } else if (isBasicAction(subContract)) {
-//             return [key, getBasicAction<typeof subContract>(socket, actionKey)];
-//           } else {
-//             return [key, initClient(socket, subContract)];
-//           }
-//         })
-//       ),
-//     listeners:
-//       contract.listeners &&
-//       Object.fromEntries(
-//         Object.entries(contract.listeners).map(([key, subListener]) => {
-//           if (isIoListener(subListener)) {
-//             const listenerKey = key as keyof IoListeners;
-//             return [key, getListener<typeof subListener>(socket, listenerKey)];
-//           } else {
-//             return [key, initClient(socket, subListener)];
-//           }
-//         })
-//       ),
-//   };
-// };
-
-// export { initClient };
-// export type { ClientSocket, IoClient, BasicAction, ActionWithAck };
+export type { TsIoClient }
+export { initNewClient }

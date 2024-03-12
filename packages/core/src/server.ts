@@ -1,5 +1,3 @@
-import { z } from 'zod'
-import { getResponseUnionSchema, isIoAction, isIoActionWithAck } from './type-utils'
 import {
   IoAction,
   IoActions,
@@ -9,11 +7,11 @@ import {
   TBaseAction,
   TResponse,
 } from './types'
-import { Socket } from 'socket.io'
+import { getResponseUnionSchema, isIoAction, isIoActionWithAck } from './type-utils'
+import { z } from 'zod'
+import { TsIoServerAdapter } from './adapter-types'
 
-type TsIoContext = {
-  userPlayerId: string
-}
+type TsIoContext = Record<string, any>
 
 type EmitEventToFunction<Listeners extends IoListeners> = <ListenerKey extends keyof Listeners>(
   listenerKey: ListenerKey,
@@ -79,12 +77,17 @@ const recursivelyApplySocketEvents = <Listeners extends IoListeners>({
         throw new Error(`[ts-io] Expected AppRouter but received AppRoute`)
       }
 
-      recursivelyApplySocketEvents({
-        event: key,
-        schema: schema[key],
-        router: (router as RecursiveActionsObj<any, Listeners>)[key],
-        processRoute,
-      })
+      const schemaValue = schema[key]
+      const routerValue = (router as RecursiveActionsObj<any, Listeners>)[key]
+
+      if (schemaValue && routerValue) {
+        recursivelyApplySocketEvents({
+          event: key,
+          schema: schemaValue,
+          router: routerValue,
+          processRoute,
+        })
+      }
     }
   } else if (typeof router === 'function' || typeof router?.handler === 'function') {
     if (!isIoAction(schema)) {
@@ -105,15 +108,18 @@ const validateInputData = <Action extends TBaseAction>(
 ) => {
   const parsedInput = contract.input.safeParse(input)
   if (!parsedInput.success) {
-    throw new Error('Invalid input payload')
+    throw new Error(`Invalid input payload: ${parsedInput.error.message}`)
   }
+
   return parsedInput
 }
 
 const emitEventTo =
-  <Listeners extends IoListeners>(socket: Socket): EmitEventToFunction<Listeners> =>
+  <Listeners extends IoListeners, Adapter extends TsIoServerAdapter<any>>(
+    adapter: Adapter
+  ): EmitEventToFunction<Listeners> =>
   (event, socketId, data) => {
-    socket.to(socketId).emit(event as any, data)
+    adapter.emitTo(socketId, event as any, data)
   }
 
 const DEFAULT_ACTION_OPTIONS: IoAction['options'] = {
@@ -121,8 +127,8 @@ const DEFAULT_ACTION_OPTIONS: IoAction['options'] = {
 }
 
 const applySocketBasicEvent =
-  <Action extends TBaseAction>(
-    socket: Socket,
+  <Action extends TBaseAction, Adapter extends TsIoServerAdapter<any>>(
+    adapter: Adapter,
     contract: Action,
     implementation: ActionImplementation<Action, any>,
     ctx: TsIoContext
@@ -135,14 +141,18 @@ const applySocketBasicEvent =
       return await implementation.handler({
         input: validatedInput.data,
         ctx,
-        emitEventTo: emitEventTo(socket),
+        emitEventTo: emitEventTo(adapter),
       })
     }
   }
 
 const applySocketEventWithAck =
-  <Action extends TActionWithAck, Listeners extends IoListeners>(
-    socket: Socket,
+  <
+    Action extends TActionWithAck,
+    Listeners extends IoListeners,
+    Adapter extends TsIoServerAdapter<any>,
+  >(
+    adapter: Adapter,
     contract: Action,
     impl: ActionImplementation<Action, Listeners>,
     ctx: TsIoContext
@@ -158,7 +168,7 @@ const applySocketEventWithAck =
       const response = await impl.handler({
         input: validatedInput.data,
         ctx,
-        emitEventTo: emitEventTo(socket),
+        emitEventTo: emitEventTo(adapter),
       })
 
       if (!response) {
@@ -168,17 +178,17 @@ const applySocketEventWithAck =
       const ResponseUnionSchema = getResponseUnionSchema(contract.response)
       const parsedResponse = ResponseUnionSchema.safeParse(response)
       if (!parsedResponse.success) {
-        throw new Error(`Response does not match ${event}'s contract response schema`)
+        throw new Error(`Response does not match contract's response schema`)
       }
 
       callback(response)
     }
   }
 
-const applySocketActions = <Contract extends IoContract>(
+const attachTsIoToWebSocket = <Contract extends IoContract>(
   schema: Contract,
   actions: InferServerActions<Contract>,
-  socket: Socket
+  adapter: any
 ) => {
   recursivelyApplySocketEvents({
     event: null,
@@ -190,10 +200,10 @@ const applySocketActions = <Contract extends IoContract>(
       if (isIoActionWithAck(schema)) {
         const impl = implementation
 
-        return socket.on(
+        return adapter.on(
           event as any,
           applySocketEventWithAck(
-            socket,
+            adapter,
             schema,
             impl as ActionImplementation<TActionWithAck, IoListeners>,
             ctx
@@ -201,10 +211,10 @@ const applySocketActions = <Contract extends IoContract>(
         )
       }
 
-      return socket.on(
+      return adapter.on(
         event as any,
         applySocketBasicEvent(
-          socket,
+          adapter,
           schema,
           implementation as ActionImplementation<TBaseAction, IoListeners>,
           ctx
@@ -214,7 +224,7 @@ const applySocketActions = <Contract extends IoContract>(
   })
 }
 
-const initServer = (context?: TsIoContext) => {
+const initTsIoServer = (context?: TsIoContext) => {
   return {
     actions: <Contract extends IoContract>(
       _schema: Contract,
@@ -233,5 +243,5 @@ const initServer = (context?: TsIoContext) => {
   }
 }
 
-export type { InferServerActions, TsIoContext }
-export { initServer, applySocketActions }
+export type { InferServerActions }
+export { attachTsIoToWebSocket, initTsIoServer }

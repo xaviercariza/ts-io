@@ -1,0 +1,58 @@
+# Server
+
+The server integration module serves as the conduit between your defined contracts and the implementation of your WebSocket server. It provides the foundational framework for bringing your WebSocket application to life, allowing you to define handlers for actions, broadcast messages, and orchestrate real-time communication.
+
+## Initialization
+
+To kickstart your server integration, you begin by initializing the server instance using the `initServer` function. This function accepts optional parameters to customize the server's functionality. Here's how you can initialize the server:
+
+To kickstart the server integration, use the `initServer` function, which initializes the server instance and configures its behavior. This function accepts optional parameters to customize the server's functionality.
+
+```typescript filename="server.ts" copy
+const server = initServer({
+  validateInputOutput: true,
+  context: {
+    userId: user.id,
+  },
+})
+```
+
+In this example, we're passing an options object to the `initServer` function. The validateInputOutput option ensures that the input and response data of actions are validated against their schemas, enhancing data integrity and reliability. Additionally, the context object allows you to define context variables accessible across all action handlers, facilitating contextual data sharing.
+
+## Defining Action Handlers
+
+Once the server is initialized, you'll define action handlers to handle incoming actions from clients. Action handlers process client requests, perform necessary operations, and respond accordingly. Here's an example of defining action handlers for a postContract:
+
+```typescript filename="server.ts" copy
+const postActions = s.actions(postContract, {
+  createPost: {
+    handler: ({ input, ctx, emitEventTo }) => {
+      const { title, body } = input
+
+      const newPost = {
+        id: 'post-1',
+        title,
+        body,
+      }
+
+      // Broadcast event to 'client-2' with the new post data
+      emitEventTo('onPostCreated', 'client-2', newPost)
+
+      // Respond to the client with success and new post data
+      return { success: true, data: newPost }
+    },
+  },
+})
+```
+
+In this example, the createPost action handler receives input data from the client, processes it to create a new post, and then emits an event to notify another client about the new post creation. Finally, it responds to the client that triggered the action with success and the newly created post data.
+
+## Applying Socket Events
+
+Finally, the applySocketEvents function connects the WebSocket socket to the defined contract and action handlers, enabling seamless communication between clients and the server.
+
+```typescript filename="server.ts" copy
+applySocketEvents(socket, postContract, postActions)
+```
+
+With this integration in place, developers can effortlessly manage WebSocket interactions, define custom actions, and broadcast messages to clients or specific groups, enhancing the real-time capabilities of their applications.

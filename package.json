@@ -1,5 +1,7 @@
 {
+  "name": "root",
   "private": true,
+  "packageManager": "pnpm@7.15.0",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -16,8 +18,7 @@
     "@turbo/gen": "^1.9.7",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "turbo": "^1.12.4"
-  },
-  "packageManager": "pnpm@7.15.0",
-  "name": "test-lib"
+    "turbo": "^1.12.4",
+    "typescript": "^5.3.3"
+  }
 }

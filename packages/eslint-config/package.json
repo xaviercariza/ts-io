@@ -1,12 +1,12 @@
 {
   "name": "@ts-io/eslint-config",
-  "version": "0.0.0",
+  "description": "Custom eslint config for ts-io",
   "private": true,
+  "version": "0.0.0",
   "files": [
     "library.js",
     "next.js"
   ],
-  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
