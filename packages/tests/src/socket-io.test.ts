@@ -1,4 +1,3 @@
-/* eslint-disable no-async-promise-executor */
 import {
   InferContractActions,
   InferContractListeners,
@@ -154,39 +153,37 @@ describe('socketio', () => {
       })
     })
 
-    it('handles basic action w/ emit', async () =>
-      new Promise<void>(async done => {
-        const serverActionHandler = vi.spyOn(actions.basicActionWithEmit, 'handler')
+    it('handles basic action w/ emit', async () => {
+      const serverActionHandler = vi.spyOn(actions.basicActionWithEmit, 'handler')
 
-        const emitterIoClientAdapter = createSocketIoClientProxy(clientEmitterSocket)
-        const emitterClient = initNewClient(emitterIoClientAdapter, contract)
+      const emitterIoClientAdapter = createSocketIoClientProxy(clientEmitterSocket)
+      const emitterClient = initNewClient(emitterIoClientAdapter, contract)
 
-        const listenerIoClientAdapter = createSocketIoClientProxy(clientListenerSocket)
-        const listenerClient = initNewClient(listenerIoClientAdapter, contract)
+      const listenerIoClientAdapter = createSocketIoClientProxy(clientListenerSocket)
+      const listenerClient = initNewClient(listenerIoClientAdapter, contract)
 
-        const actionPayload = {
-          title: 'This is the title',
-          body: 'This is the body',
-        }
+      const actionPayload = {
+        title: 'This is the title',
+        body: 'This is the body',
+      }
 
-        listenerClient.listeners.onPostCreated(response => {
-          expect(response).toStrictEqual({ ...actionPayload, id: 'post-1' })
-          done()
+      listenerClient.listeners.onPostCreated(async response => {
+        await vi.waitFor(() => expect(response).toStrictEqual({ ...actionPayload, id: 'post-1' }))
+      })
+
+      await emitterClient.actions.basicActionWithEmit(actionPayload)
+
+      await waitForServerToReceiveEvent<TestContract>(serverEmitterSocket, 'basicActionWithEmit')
+
+      expect(serverActionHandler).toHaveBeenCalledTimes(1)
+      expect(serverActionHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: actionPayload,
+          ctx: context,
+          emitEventTo: expect.any(Function),
         })
-
-        await emitterClient.actions.basicActionWithEmit(actionPayload)
-
-        await waitForServerToReceiveEvent<TestContract>(serverEmitterSocket, 'basicActionWithEmit')
-
-        expect(serverActionHandler).toHaveBeenCalledTimes(1)
-        expect(serverActionHandler).toHaveBeenCalledWith(
-          expect.objectContaining({
-            input: actionPayload,
-            ctx: context,
-            emitEventTo: expect.any(Function),
-          })
-        )
-      }))
+      )
+    })
   })
 
   describe('request-response actions', () => {
@@ -215,39 +212,37 @@ describe('socketio', () => {
       })
     })
 
-    it('handles action w/ success response and w/ emit', async () =>
-      new Promise<void>(async done => {
-        const serverActionHandler = vi.spyOn(actions.actionWithAckSuccessWithEmit, 'handler')
+    it('handles action w/ success response and w/ emit', async () => {
+      const serverActionHandler = vi.spyOn(actions.actionWithAckSuccessWithEmit, 'handler')
 
-        const emitterIoClientAdapter = createSocketIoClientProxy(clientEmitterSocket)
-        const emitterClient = initNewClient(emitterIoClientAdapter, contract)
+      const emitterIoClientAdapter = createSocketIoClientProxy(clientEmitterSocket)
+      const emitterClient = initNewClient(emitterIoClientAdapter, contract)
 
-        const listenerIoClientAdapter = createSocketIoClientProxy(clientListenerSocket)
-        const listenerClient = initNewClient(listenerIoClientAdapter, contract)
+      const listenerIoClientAdapter = createSocketIoClientProxy(clientListenerSocket)
+      const listenerClient = initNewClient(listenerIoClientAdapter, contract)
 
-        const actionPayload = {
-          title: 'This is the title',
-          body: 'This is the body',
-        }
+      const actionPayload = {
+        title: 'This is the title',
+        body: 'This is the body',
+      }
 
-        listenerClient.listeners.onPostCreated(response => {
-          expect(response).toStrictEqual({ ...actionPayload, id: 'post-1' })
-          done()
-        })
+      listenerClient.listeners.onPostCreated(async response => {
+        await vi.waitFor(() => expect(response).toStrictEqual({ ...actionPayload, id: 'post-1' }))
+      })
 
-        const response = await emitterClient.actions.actionWithAckSuccessWithEmit(actionPayload)
+      const response = await emitterClient.actions.actionWithAckSuccessWithEmit(actionPayload)
 
-        expect(serverActionHandler).toHaveBeenCalledTimes(1)
-        expect(serverActionHandler).toHaveBeenCalledWith({
-          input: actionPayload,
-          ctx: context,
-          emitEventTo: expect.any(Function),
-        })
-        expect(response).toStrictEqual({
-          success: true,
-          data: { id: 'post-1', ...actionPayload },
-        })
-      }))
+      expect(serverActionHandler).toHaveBeenCalledTimes(1)
+      expect(serverActionHandler).toHaveBeenCalledWith({
+        input: actionPayload,
+        ctx: context,
+        emitEventTo: expect.any(Function),
+      })
+      expect(response).toStrictEqual({
+        success: true,
+        data: { id: 'post-1', ...actionPayload },
+      })
+    })
 
     it('handles action w/ error response', async () => {
       const serverActionHandler = vi.spyOn(actions.actionWithAckError, 'handler')
