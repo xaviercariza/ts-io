@@ -1,10 +1,7 @@
 import { initContract, initTsIo } from '@ts-io/core'
 import { describe, expect, vi } from 'vitest'
 import { z } from 'zod'
-import { waitForSocketIoClientToReceiveEvent, waitForSocketIoServerToReceiveEvent } from './utils'
 import { socketsTest } from './utils'
-
-type Contract = typeof contract
 
 const ACTIONS_MOCK = {
   fireAndForget: vi.fn(),
@@ -52,50 +49,47 @@ const contract = c.actions({
 const context = { userName: 'Xavier' }
 const tsIo = initTsIo(context, contract)
 
-describe('socketio', () => {
+describe('ws', () => {
   describe('fire and forget actions', () => {
-    socketsTest(
-      'handles basic fire and forget action',
-      async ({ socketIoFixture, onTestFinished }) => {
-        // Initialize sockets
-        const { setup, closeConnections } = await socketIoFixture.setupSocketIo(contract)
+    socketsTest('handles basic fire and forget action', async ({ wsFixture, onTestFinished }) => {
+      // Initialize sockets
+      const { setup, closeConnections } = await wsFixture.setupWs(contract)
 
-        // Create router with action
-        const actionHandler = vi.fn()
-        const router = tsIo.router({
-          ...ACTIONS_MOCK,
-          fireAndForget: tsIo.action('fireAndForget').handler(actionHandler),
-        })
+      // Create router with action
+      const actionHandler = vi.fn()
+      const router = tsIo.router({
+        ...ACTIONS_MOCK,
+        fireAndForget: tsIo.action('fireAndForget').handler(actionHandler),
+      })
 
-        // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+      // Attach router to socket
+      wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
 
-        const actionPayload = {
-          title: 'This is the title',
-          body: 'This is the body',
-        }
-
-        setup.client.socket1.client.actions.fireAndForget(actionPayload)
-
-        await waitForSocketIoServerToReceiveEvent<Contract>(setup.server.socket, 'fireAndForget')
-
-        expect(actionHandler).toHaveBeenCalledTimes(1)
-        expect(actionHandler).toHaveBeenCalledWith({
-          path: 'fireAndForget',
-          ctx: context,
-          input: actionPayload,
-          emitEventTo: setup.server.adapter.emitTo,
-        })
-
-        onTestFinished(closeConnections)
+      // Run action
+      const actionPayload = {
+        title: 'This is the title',
+        body: 'This is the body',
       }
-    )
+      setup.client.socket1.client.actions.fireAndForget(actionPayload)
+
+      // Assert action handler has been called with correct parameters
+      await vi.waitFor(() => expect(actionHandler).toHaveBeenCalledTimes(1))
+      expect(actionHandler).toHaveBeenCalledWith({
+        path: 'fireAndForget',
+        ctx: context,
+        input: actionPayload,
+        emitEventTo: setup.server.adapter.emitTo,
+      })
+
+      // Close socket connections
+      onTestFinished(closeConnections)
+    })
 
     socketsTest(
       'handles fire and forget action w/ emit to other client',
-      async ({ socketIoFixture, onTestFinished }) => {
+      async ({ wsFixture, onTestFinished }) => {
         // Initialize sockets
-        const { setup, closeConnections } = await socketIoFixture.setupSocketIo(contract)
+        const { setup, closeConnections } = await wsFixture.setupWs(contract)
 
         // Create router with action
         const actionHandler = vi.fn()
@@ -113,7 +107,7 @@ describe('socketio', () => {
         })
 
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
 
         // Prepare
         const emitToAdapter = vi.spyOn(setup.server.adapter, 'emitTo')
@@ -129,17 +123,10 @@ describe('socketio', () => {
         // Run action
         setup.client.socket1.client.actions.fireAndForgetWithEmit(actionPayload)
 
-        // Wait for server to receive action event
-        await waitForSocketIoServerToReceiveEvent<Contract>(
-          setup.server.socket,
-          'fireAndForgetWithEmit'
-        )
-
-        // Wait for client to receive server emit event
-        await waitForSocketIoClientToReceiveEvent<Contract>(
-          setup.client.socket2.socket,
-          'onActionResponse'
-        )
+        // Wait until client received event from server and executed the callback
+        await vi.waitFor(() => expect(listenerHandler).toHaveBeenCalledTimes(1))
+        // Assert client listener has been called correctly with correct payload
+        expect(listenerHandler).toHaveBeenCalledWith({ ...actionPayload, id: 'post-1' })
 
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
@@ -162,10 +149,6 @@ describe('socketio', () => {
           }
         )
 
-        // Assert client listener has been called correctly with correct payload
-        expect(listenerHandler).toHaveBeenCalledTimes(1)
-        expect(listenerHandler).toHaveBeenCalledWith({ ...actionPayload, id: 'post-1' })
-
         // Close socket connections
         onTestFinished(closeConnections)
       }
@@ -175,9 +158,9 @@ describe('socketio', () => {
   describe('request-response actions', () => {
     socketsTest(
       'handles basic request-response action w/ success response',
-      async ({ socketIoFixture, onTestFinished }) => {
+      async ({ wsFixture, onTestFinished }) => {
         // Initialize sockets
-        const { setup, closeConnections } = await socketIoFixture.setupSocketIo(contract)
+        const { setup, closeConnections } = await wsFixture.setupWs(contract)
 
         // Create router with action
         const actionHandler = vi.fn()
@@ -197,7 +180,7 @@ describe('socketio', () => {
         })
 
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
 
         // Prepare
         const actionPayload = {
@@ -208,11 +191,8 @@ describe('socketio', () => {
         // Run action
         setup.client.socket1.client.actions.requestResponse(actionPayload)
 
-        // Wait for server to receive action event
-        await waitForSocketIoServerToReceiveEvent<Contract>(setup.server.socket, 'requestResponse')
-
         // Assert action handler has been called with correct parameters
-        expect(actionHandler).toHaveBeenCalledTimes(1)
+        await vi.waitFor(() => expect(actionHandler).toHaveBeenCalledTimes(1))
         expect(actionHandler).toHaveBeenCalledWith({
           path: 'requestResponse',
           input: actionPayload,
@@ -227,9 +207,9 @@ describe('socketio', () => {
 
     socketsTest(
       'handles request-response action w/ emit to other client',
-      async ({ socketIoFixture, onTestFinished }) => {
+      async ({ wsFixture, onTestFinished }) => {
         // Initialize sockets
-        const { setup, closeConnections } = await socketIoFixture.setupSocketIo(contract)
+        const { setup, closeConnections } = await wsFixture.setupWs(contract)
 
         // Create router with action
         const actionHandler = vi.fn()
@@ -246,7 +226,7 @@ describe('socketio', () => {
         })
 
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
 
         // Prepare
         const emitToAdapter = vi.spyOn(setup.server.adapter, 'emitTo')
@@ -262,17 +242,10 @@ describe('socketio', () => {
         // Run action
         const action = setup.client.socket1.client.actions.requestResponseWithEmit(actionPayload)
 
-        // Wait for server to receive action event
-        await waitForSocketIoServerToReceiveEvent<Contract>(
-          setup.server.socket,
-          'requestResponseWithEmit'
-        )
-
-        // Wait for client to receive server emit event
-        await waitForSocketIoClientToReceiveEvent<Contract>(
-          setup.client.socket2.socket,
-          'onActionResponse'
-        )
+        // Wait until client received event from server and executed the callback
+        await vi.waitFor(() => expect(listenerHandler).toHaveBeenCalledTimes(1))
+        // Assert client listener has been called correctly with correct payload
+        expect(listenerHandler).toHaveBeenCalledWith({ ...actionPayload, id: 'post-1' })
 
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
@@ -301,10 +274,6 @@ describe('socketio', () => {
           data: { ...actionPayload, id: 'post-1' },
         })
 
-        // Assert client listener has been called correctly with correct payload
-        expect(listenerHandler).toHaveBeenCalledTimes(1)
-        expect(listenerHandler).toHaveBeenCalledWith({ ...actionPayload, id: 'post-1' })
-
         // Close socket connections
         onTestFinished(closeConnections)
       }
@@ -312,9 +281,9 @@ describe('socketio', () => {
 
     socketsTest(
       'handles basic request-response action w/ error response',
-      async ({ socketIoFixture, onTestFinished }) => {
+      async ({ wsFixture, onTestFinished }) => {
         // Initialize sockets
-        const { setup, closeConnections } = await socketIoFixture.setupSocketIo(contract)
+        const { setup, closeConnections } = await wsFixture.setupWs(contract)
 
         // Create router with action
         const actionHandler = vi.fn()
@@ -328,7 +297,7 @@ describe('socketio', () => {
         })
 
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
 
         // Prepare
         const actionPayload = {
@@ -339,10 +308,13 @@ describe('socketio', () => {
         // Run action
         const action = setup.client.socket1.client.actions.requestResponseError(actionPayload)
 
-        // Wait for server to receive action event
-        await waitForSocketIoServerToReceiveEvent<Contract>(
-          setup.server.socket,
-          'requestResponseError'
+        // Wait until client received event from server and
+        // assert server has returned payload to the client
+        await vi.waitFor(() =>
+          expect(action).resolves.toStrictEqual({
+            success: false,
+            error: 'Action with ack error',
+          })
         )
 
         // Assert action handler has been called with correct parameters
@@ -352,12 +324,6 @@ describe('socketio', () => {
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,
-        })
-
-        // Assert server has returned payload to the client
-        expect(action).resolves.toStrictEqual({
-          success: false,
-          error: 'Action with ack error',
         })
 
         // Close socket connections

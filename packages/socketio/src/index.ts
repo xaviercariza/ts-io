@@ -1,2 +1,2 @@
-export { createSocketIoClientProxy } from './client'
-export { createSocketIoServerProxy } from './server'
+export { createSocketIoClientAdapter } from './client'
+export { createSocketIoServerAdapter } from './server'

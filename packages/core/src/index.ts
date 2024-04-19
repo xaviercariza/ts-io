@@ -1,7 +1,17 @@
 export { initContract } from './contract'
-export type { IoContract, InferContractActions, InferContractListeners } from './types'
-export { initTsIoServer, attachTsIoToWebSocket } from './server'
-export type { InferServerActions } from './server'
+export type {
+  IoContract,
+  IoAction,
+  TResponse,
+  InferContractActions,
+  InferContractListeners,
+  InferSocketActions,
+  InferSocketListeners,
+} from './types'
+export type { MaybePromise } from './server/types'
+export type { TsIoServerAdapter, TsIoClientAdapter, TsIoServerEmitter } from './adapter-types'
 export { initNewClient } from './client'
 export type { TsIoClient } from './client'
-export type { TsIoServerAdapter, TsIoServerEmitter, TsIoClientAdapter } from './adapter-types'
+export { initTsIo, attachTsIoToWebSocket } from './server/server'
+export { type Router } from './server/router'
+export { type EmitEventToFunction } from './server/emitter'

@@ -36,6 +36,43 @@ importers:
         specifier: ^5.4.2
         version: 5.4.2
 
+  apps/demo:
+    dependencies:
+      '@ts-io/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@ts-io/socketio':
+        specifier: workspace:*
+        version: link:../../packages/socketio
+      '@ts-io/ws':
+        specifier: workspace:*
+        version: link:../../packages/ws
+      socket.io:
+        specifier: ^4.7.4
+        version: 4.7.4
+      socket.io-client:
+        specifier: ^4.7.2
+        version: 4.7.4
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@ts-io/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@ts-io/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@types/node':
+        specifier: 20.10.0
+        version: 20.10.0
+      tsx:
+        specifier: ^4.7.1
+        version: 4.7.1
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.2
+
   apps/docs:
     dependencies:
       next:
@@ -84,6 +121,9 @@ importers:
 
   packages/core:
     dependencies:
+      pipe-ts:
+        specifier: ^0.0.9
+        version: 0.0.9
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -6846,6 +6886,10 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  /pipe-ts@0.0.9:
+    resolution: {integrity: sha512-j5DfveOe0xC4hIK6/FRJ+zHjvrgbMO+kgnM4ZsSQqWZZL8fgCYCAu7TXdkVLavX/2nALm32yBVDixW8+/aYtGA==}
+    dev: false
+
   /pirates@4.0.6:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
@@ -8218,6 +8262,17 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 5.4.2
+    dev: true
+
+  /tsx@4.7.1:
+    resolution: {integrity: sha512-8d6VuibXHtlN5E3zFkgY8u4DX7Y3Z27zvvPKVmLon/D4AjuKzarkUBTLDBgj9iTQ0hg5xM7c/mYiRVM+HETf0g==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+    dependencies:
+      esbuild: 0.19.12
+      get-tsconfig: 4.7.3
+    optionalDependencies:
+      fsevents: 2.3.3
     dev: true
 
   /turbo-darwin-64@1.12.5:

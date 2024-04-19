@@ -14,6 +14,7 @@ function createWsClientProxy<Contract extends IoContract>(
   socket.addEventListener('message', event => {
     const data = JSON.parse(event.data.toString())
     const messageId = data.messageId
+
     if (requestCallbacks.has(messageId)) {
       const callback = requestCallbacks.get(messageId)
       if (callback) {
@@ -31,25 +32,19 @@ function createWsClientProxy<Contract extends IoContract>(
   })
 
   return {
-    emit: (event, payload) => {
+    emit: (event, payload, callback) => {
       const messageId = generateRequestId()
-      const promise = new Promise<any>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          requestCallbacks.delete(messageId)
-          reject(new Error('Request timed out'))
-        }, 5000)
+      const timeout = setTimeout(() => {
+        requestCallbacks.delete(messageId)
+        callback?.({ success: false, error: 'Request timed out' })
+      }, 5000)
 
-        requestCallbacks.set(messageId, (response: any) => {
-          clearTimeout(timeout)
-          if (response.data.success) {
-            resolve(response.data.data)
-          }
-        })
+      requestCallbacks.set(messageId, (response: any) => {
+        clearTimeout(timeout)
+        callback?.(response.data)
       })
 
       socket.send(JSON.stringify({ messageId, event, data: payload }))
-
-      return promise
     },
     on: (event, callback) => {
       eventsCallbacks.set(event, (response: any) => {

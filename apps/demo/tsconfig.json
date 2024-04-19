@@ -1,0 +1,9 @@
+{
+  "extends": "@ts-io/typescript-config/node.json",
+  "compilerOptions": {
+    "module": "ES2020",
+    "moduleResolution": "Bundler"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

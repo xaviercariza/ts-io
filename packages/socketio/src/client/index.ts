@@ -1,7 +1,7 @@
 import { type IoContract, type TsIoClientAdapter } from '@ts-io/core'
 import { Socket } from 'socket.io-client'
 
-function createSocketIoClientProxy<Contract extends IoContract>(
+function createSocketIoClientAdapter<Contract extends IoContract>(
   socket: Socket
 ): TsIoClientAdapter<Contract> {
   return {
@@ -18,4 +18,4 @@ function createSocketIoClientProxy<Contract extends IoContract>(
   }
 }
 
-export { createSocketIoClientProxy }
+export { createSocketIoClientAdapter }

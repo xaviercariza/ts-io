@@ -1,4 +1,15 @@
-import { z } from 'zod'
+import { ZodType, z } from 'zod'
+
+const unsetMarker = Symbol('unsetMarker')
+type UnsetMarker = typeof unsetMarker
+
+type DefaultValue<TValue, TFallback> = TValue extends UnsetMarker ? TFallback : TValue
+
+type ParseSchema<Schema extends ZodType | undefined> = Schema extends undefined
+  ? UnsetMarker
+  : Schema extends ZodType
+    ? z.infer<Schema>
+    : never
 
 type ActionOptions = {
   validate?: boolean
@@ -52,7 +63,31 @@ type InferContractListeners<Contract extends IoContract> = {
   ) => void
 }
 
+type InferSocketActions<Contract extends IoContract> = {
+  [ActionKey in keyof Contract['actions']]: (
+    input: Contract['actions'][ActionKey] extends IoAction
+      ? z.infer<Contract['actions'][ActionKey]['input']>
+      : never,
+    callback: Contract['actions'][ActionKey] extends TActionWithAck
+      ? (
+          output: TResponse<z.infer<Contract['actions'][ActionKey]['response']>>
+        ) => Promise<void> | void
+      : undefined
+  ) => void
+}
+
+type InferSocketListeners<Contract extends IoContract> = {
+  [ActionKey in keyof Contract['listeners']]: (
+    data: Contract['listeners'][ActionKey] extends IoListener
+      ? z.infer<Contract['listeners'][ActionKey]['data']>
+      : never
+  ) => void
+}
+
 export type {
+  UnsetMarker,
+  DefaultValue,
+  ParseSchema,
   ActionOptions,
   InferContractActions,
   InferContractListeners,
@@ -65,4 +100,6 @@ export type {
   TBaseAction,
   TResponse,
   TSuccessResponse,
+  InferSocketActions,
+  InferSocketListeners,
 }

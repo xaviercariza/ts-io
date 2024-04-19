@@ -49,12 +49,12 @@ const getBasicAction =
   }
 const getActionWithAck =
   <TAction extends TActionWithAck, Adapter extends TsIoClientAdapter<any>>(
-    socket: Adapter,
+    adapter: Adapter,
     actionKey: keyof IoActions
   ): ActionWithAck<TAction> =>
   body => {
     return new Promise<TResponse<z.infer<TAction['response']>>>(resolve => {
-      socket.emit(actionKey as any, body, resolve)
+      adapter.emit(actionKey as any, body, resolve)
     })
   }
 
@@ -101,7 +101,6 @@ const initNewClient = <Contract extends IoContract, Adapter extends TsIoClientAd
         Object.entries(contract.listeners).map(([key, subListener]) => {
           if (isIoListener(subListener)) {
             const listenerKey = key as keyof IoListeners
-
             return [key, getListener(adapter, listenerKey)]
           } else {
             return [key, initNewClient(adapter, subListener)]

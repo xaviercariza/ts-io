@@ -12,12 +12,12 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@types/node": "20.10.0",
-    "@ts-io/eslint-config": "workspace:*",
     "@ts-io/core": "workspace:^",
+    "@ts-io/eslint-config": "workspace:*",
     "@ts-io/socketio": "workspace:^",
     "@ts-io/typescript-config": "workspace:*",
     "@ts-io/ws": "workspace:^",
+    "@types/node": "20.10.0",
     "@types/ws": "^8.5.10",
     "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4",

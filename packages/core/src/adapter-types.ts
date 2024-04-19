@@ -1,28 +1,35 @@
-import { InferContractActions, IoContract, IoListeners, TActionWithAck, TResponse } from './types'
+import { z } from 'zod'
+import {
+  InferSocketActions,
+  IoAction,
+  IoContract,
+  IoListeners,
+  TActionWithAck,
+  TBaseAction,
+  TResponse,
+} from './types'
+import { MaybePromise } from './server/types'
+
+type TsIoServerHandler<Action extends IoAction> = Action extends TActionWithAck
+  ? (input: Action['input']) => Promise<TResponse<z.infer<Action['response']>>>
+  : Action extends TBaseAction
+    ? (input: Action['input']) => Promise<void>
+    : never
 
 type TsIoEventMessage<Data> = { messageId: string; event: string; data: Data }
 type TsIoServerEmitter = (to: string, output: TsIoEventMessage<TResponse<any>>) => void
 type TsIoServerAcknowledgeEmitter<
-  Actions extends InferContractActions<IoContract>,
+  Actions extends InferSocketActions<IoContract>,
   Event extends keyof Actions,
 > = (output: TsIoEventMessage<TResponse<Actions[Event]>>) => void
 
-type TsIoServerAdapter<Contract extends IoContract> = {
+type TsIoServerAdapter<Action extends IoAction> = {
   emitTo<Event extends string, Response extends TResponse<any>>(
     to: string,
     event: Event,
     data: Response
   ): void
-  // acknowledge: <Actions extends InferContractActions<IoContract>, Event extends keyof Actions>(
-  //   output: TsIoEventMessage<TResponse<Actions[Event]>>
-  // ) => void
-  on<Event extends keyof Contract['actions']>(
-    event: Event,
-    callback: (
-      input: Contract['actions'][Event]['input'],
-      callback: (output: TResponse<any>) => void
-    ) => Promise<void>
-  ): void
+  on<Event extends string>(event: Event, handler: TsIoServerHandler<Action>): MaybePromise<void>
 }
 
 type TsIoClientAdapter<Contract extends IoContract> = {
@@ -52,4 +59,5 @@ export type {
   TsIoServerAcknowledgeEmitter,
   TsIoServerAdapter,
   TsIoServerEmitter,
+  TsIoServerHandler,
 }
