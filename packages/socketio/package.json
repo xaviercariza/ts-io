@@ -2,10 +2,9 @@
   "name": "@ts-io/socketio",
   "description": "Socket.io adapters for ts-io",
   "keywords": [],
-  "private": true,
   "license": "MIT",
   "author": "Xavier Cardona",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "exports": {
     "./package.json": "./package.json",
     "./client": {
@@ -46,5 +45,8 @@
     "@ts-io/core": "workspace:^",
     "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
