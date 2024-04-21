@@ -2,7 +2,6 @@
   "name": "@ts-io/socketio",
   "description": "Socket.io adapters for ts-io",
   "keywords": [],
-  "private": true,
   "license": "MIT",
   "author": "Xavier Cardona",
   "version": "0.0.0",

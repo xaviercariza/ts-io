@@ -2,7 +2,6 @@
   "name": "@ts-io/tests",
   "description": "Tests suite for ts-io",
   "private": true,
-  "version": "0.0.0",
   "scripts": {
     "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
     "types-check": "tsc --noemit",

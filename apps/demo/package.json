@@ -1,7 +1,6 @@
 {
   "name": "@ts-io/demo",
   "private": true,
-  "version": "0.0.0",
   "description": "",
   "main": "src/index.ts",
   "type": "module",
