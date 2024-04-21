@@ -15,6 +15,7 @@
     "clean:local": "find . -type d \\( -name '*node_modules*' -or -name '*turbo*' -or -name '*dist*' \\) -exec rm -rf {} \\; || true"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@ts-io/eslint-config": "workspace:*",
     "@ts-io/typescript-config": "workspace:*",
     "@turbo/gen": "^1.9.7",
