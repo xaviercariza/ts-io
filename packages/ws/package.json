@@ -2,7 +2,6 @@
   "name": "@ts-io/ws",
   "description": "WS adapters for ts-io",
   "keywords": [],
-  "private": true,
   "license": "MIT",
   "author": "Xavier Cardona",
   "version": "0.0.0",
