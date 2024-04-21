@@ -1,11 +1,11 @@
 {
   "name": "@ts-io/ws",
-  "description": "Native WebSocket adapters for ts-io",
+  "description": "WS adapters for ts-io",
   "keywords": [],
   "private": true,
   "license": "MIT",
   "author": "Xavier Cardona",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "exports": {
     "./client": {
       "types": "./dist/client.d.ts",
