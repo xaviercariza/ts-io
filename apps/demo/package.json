@@ -27,5 +27,6 @@
     "@ts-io/typescript-config": "workspace:*",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
-  }
+  },
+  "version": null
 }
