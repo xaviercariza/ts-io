@@ -8,7 +8,7 @@ import { mock } from 'vitest-mock-extended'
 import { z } from 'zod'
 
 const c = initContract()
-const contract = c.actions({
+const contract = c.router({
   actions: {
     sendMessage: {
       input: z.object({ message: z.string() }),

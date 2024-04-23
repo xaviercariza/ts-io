@@ -1,17 +1,35 @@
-import { IoListeners, ParseSchema } from '../types'
+import { ListenerPaths, ValueAtPath } from '../contract'
+import { IoContract, IoListener, ParseSchema } from '../types'
 
 type AnyEmitEventToFunction = EmitEventToFunction<any>
 
-export type EmitEventToFunction<Listeners extends IoListeners | undefined> = <
-  ListenerKey extends Listeners extends IoListeners ? keyof Listeners : never,
+// export type EmitEventToFunction<Listeners extends AnyContractRouter['listeners']> = <
+//   ListenerKey extends Leaves<Listeners>,
+// >(
+//   listenerKey: ListenerKey,
+//   socketId: string,
+//   listenerSchema: ValueAtPath<Listeners, ListenerKey> extends IoListener
+//     ? ParseSchema<ValueAtPath<Listeners, ListenerKey>['data']>
+//     : never
+//   // listenerSchema: Listeners extends IoListeners
+//   //   ? ListenerKey extends keyof Listeners
+//   //     ? ParseSchema<Listeners[ListenerKey]['data']>
+//   //     : never
+//   //   : never
+// ) => void
+export type EmitEventToFunction<Contract extends IoContract> = <
+  ListenerKey extends ListenerPaths<Contract>,
 >(
-  listenerKey: Listeners extends IoListeners ? keyof Listeners : never,
+  listenerKey: ListenerKey,
   socketId: string,
-  listenerSchema: Listeners extends IoListeners
-    ? ListenerKey extends keyof Listeners
-      ? ParseSchema<Listeners[ListenerKey]['data']>
-      : never
+  listenerSchema: ValueAtPath<Contract, ListenerKey> extends IoListener
+    ? ParseSchema<ValueAtPath<Contract, ListenerKey>['data']>
     : never
+  // listenerSchema: Listeners extends IoListeners
+  //   ? ListenerKey extends keyof Listeners
+  //     ? ParseSchema<Listeners[ListenerKey]['data']>
+  //     : never
+  //   : never
 ) => void
 
 export type { AnyEmitEventToFunction }

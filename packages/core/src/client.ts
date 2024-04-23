@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import { TsIoClientAdapter } from './adapter-types'
+import { isContractAction, isContractListener } from './contract'
+import { isBasicAction, isIoActionWithAck, isIoListener } from './type-utils'
 import {
+  IoAction,
   IoActions,
   IoContract,
   IoListener,
@@ -9,7 +12,6 @@ import {
   TBaseAction,
   TResponse,
 } from './types'
-import { isBasicAction, isIoActionWithAck, isIoListener } from './type-utils'
 
 type BasicAction<Action extends TBaseAction> = (
   body: z.infer<Action['input']>
@@ -76,39 +78,89 @@ type TsIoClient<Contract extends IoContract> = {
     : never
 }
 
-const initNewClient = <Contract extends IoContract, Adapter extends TsIoClientAdapter<IoContract>>(
+const toClientProxy = (
+  events: [string, IoAction | IoListener],
+  splitWith: string = '.'
+): TsIoClient<IoContract> => {
+  const result = {}
+
+  Object.entries(events).forEach(([path, action]) => {
+    const pathParts = path.split(splitWith)
+    let currentRouter: Record<string, any> | undefined = result
+
+    for (let i = 0; i < pathParts.length; i++) {
+      const pathKey = pathParts[i]
+      if (!pathKey) {
+        throw new Error('Error building client actions')
+      }
+      if (!currentRouter![pathKey]) {
+        if (i === pathParts.length - 1) {
+          currentRouter![pathKey] = action
+        } else {
+          currentRouter![pathKey] = {}
+        }
+      }
+      currentRouter = currentRouter![pathKey] as Record<string, any>
+    }
+  })
+
+  return result as TsIoClient<IoContract>['actions']
+}
+
+const initNewClient = <Router extends IoContract, Adapter extends TsIoClientAdapter<IoContract>>(
   adapter: Adapter,
-  contract: Contract
-): TsIoClient<Contract> => {
+  router: Router
+): TsIoClient<Router> => {
+  function getActions(
+    contract: IoContract,
+    adapter: TsIoClientAdapter<IoContract>,
+    path: string = 'actions'
+  ): [string, IoAction] {
+    return Object.fromEntries(
+      Object.entries(contract.actions).map(([key, action]) => {
+        const actionPath = `${path}.${key}`
+
+        if (!isContractAction(action)) {
+          return getActions(action, adapter, actionPath)
+        }
+
+        if (isIoActionWithAck(action)) {
+          return [actionPath, getActionWithAck(adapter, actionPath)]
+        } else if (isBasicAction(action)) {
+          return [actionPath, getBasicAction(adapter, actionPath)]
+        } else {
+          return [actionPath, initNewClient(adapter, action)]
+        }
+      })
+    )
+  }
+  function getListeners(
+    contract: IoContract,
+    adapter: TsIoClientAdapter<IoContract>,
+    path: string = 'listeners'
+  ): [string, IoListener] {
+    return Object.fromEntries(
+      Object.entries(contract.listeners).map(([key, listener]) => {
+        const listenerPath = `${path}.${key}`
+
+        if (!isContractListener(listener)) {
+          return getListeners(listener, adapter, listenerPath)
+        }
+
+        if (isIoListener(listener)) {
+          return [listenerPath, getListener(adapter, listenerPath)]
+        } else {
+          return [listenerPath, initNewClient(adapter, listener)]
+        }
+      })
+    )
+  }
+
   return {
-    actions:
-      contract.actions &&
-      Object.fromEntries(
-        Object.entries(contract.actions).map(([key, subContract]) => {
-          const actionKey = key as keyof IoActions
-          if (isIoActionWithAck(subContract)) {
-            return [key, getActionWithAck(adapter, actionKey)]
-          } else if (isBasicAction(subContract)) {
-            return [key, getBasicAction(adapter, actionKey)]
-          } else {
-            return [key, initNewClient(adapter, subContract)]
-          }
-        })
-      ),
-    listeners:
-      contract.listeners &&
-      Object.fromEntries(
-        Object.entries(contract.listeners).map(([key, subListener]) => {
-          if (isIoListener(subListener)) {
-            const listenerKey = key as keyof IoListeners
-            return [key, getListener(adapter, listenerKey)]
-          } else {
-            return [key, initNewClient(adapter, subListener)]
-          }
-        })
-      ),
+    ...toClientProxy(getActions(router, adapter)),
+    ...toClientProxy(getListeners(router, adapter)),
   }
 }
 
-export type { TsIoClient }
 export { initNewClient }
+export type { TsIoClient }

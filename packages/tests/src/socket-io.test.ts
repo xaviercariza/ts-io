@@ -21,7 +21,7 @@ const PostSchema = z.object({
 })
 
 const c = initContract()
-const contract = c.actions({
+const contract = c.router({
   actions: {
     fireAndForget: {
       input: PostSchema.omit({ id: true }),
@@ -77,11 +77,14 @@ describe('socketio', () => {
 
         setup.client.socket1.client.actions.fireAndForget(actionPayload)
 
-        await waitForSocketIoServerToReceiveEvent<Contract>(setup.server.socket, 'fireAndForget')
+        await waitForSocketIoServerToReceiveEvent<Contract>(
+          setup.server.socket,
+          'actions.fireAndForget'
+        )
 
         expect(actionHandler).toHaveBeenCalledTimes(1)
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'fireAndForget',
+          path: 'actions.fireAndForget',
           ctx: context,
           input: actionPayload,
           emitEventTo: setup.server.adapter.emitTo,
@@ -103,7 +106,7 @@ describe('socketio', () => {
           ...ACTIONS_MOCK,
           fireAndForgetWithEmit: tsIo.action('fireAndForgetWithEmit').handler(
             actionHandler.mockImplementation(({ emitEventTo }) => {
-              emitEventTo('onActionResponse', setup.client.socket2.socket.id, {
+              emitEventTo('listeners.onActionResponse', setup.client.socket2.socket.id, {
                 id: 'post-1',
                 title: 'This is the title',
                 body: 'This is the body',
@@ -132,19 +135,19 @@ describe('socketio', () => {
         // Wait for server to receive action event
         await waitForSocketIoServerToReceiveEvent<Contract>(
           setup.server.socket,
-          'fireAndForgetWithEmit'
+          'actions.fireAndForgetWithEmit'
         )
 
         // Wait for client to receive server emit event
         await waitForSocketIoClientToReceiveEvent<Contract>(
           setup.client.socket2.socket,
-          'onActionResponse'
+          'listeners.onActionResponse'
         )
 
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'fireAndForgetWithEmit',
+          path: 'actions.fireAndForgetWithEmit',
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,
@@ -153,7 +156,7 @@ describe('socketio', () => {
         // Assert server action has emitted an event to a client with correct parameters
         expect(emitToAdapter).toHaveBeenCalledTimes(1)
         expect(emitToAdapter).toHaveBeenCalledWith(
-          'onActionResponse',
+          'listeners.onActionResponse',
           setup.client.socket2.socket.id,
           {
             body: 'This is the body',
@@ -209,12 +212,15 @@ describe('socketio', () => {
         setup.client.socket1.client.actions.requestResponse(actionPayload)
 
         // Wait for server to receive action event
-        await waitForSocketIoServerToReceiveEvent<Contract>(setup.server.socket, 'requestResponse')
+        await waitForSocketIoServerToReceiveEvent<Contract>(
+          setup.server.socket,
+          'actions.requestResponse'
+        )
 
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'requestResponse',
+          path: 'actions.requestResponse',
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,
@@ -239,7 +245,7 @@ describe('socketio', () => {
             actionHandler.mockImplementation(({ input, emitEventTo }) => {
               const { title, body } = input
               const newPost = { id: 'post-1', title, body }
-              emitEventTo('onActionResponse', setup.client.socket2.socket.id, newPost)
+              emitEventTo('listeners.onActionResponse', setup.client.socket2.socket.id, newPost)
               return { success: true, data: newPost }
             })
           ),
@@ -265,19 +271,19 @@ describe('socketio', () => {
         // Wait for server to receive action event
         await waitForSocketIoServerToReceiveEvent<Contract>(
           setup.server.socket,
-          'requestResponseWithEmit'
+          'actions.requestResponseWithEmit'
         )
 
         // Wait for client to receive server emit event
         await waitForSocketIoClientToReceiveEvent<Contract>(
           setup.client.socket2.socket,
-          'onActionResponse'
+          'listeners.onActionResponse'
         )
 
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'requestResponseWithEmit',
+          path: 'actions.requestResponseWithEmit',
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,
@@ -286,7 +292,7 @@ describe('socketio', () => {
         // Assert server action has emitted an event to a client with correct parameters
         expect(emitToAdapter).toHaveBeenCalledTimes(1)
         expect(emitToAdapter).toHaveBeenCalledWith(
-          'onActionResponse',
+          'listeners.onActionResponse',
           setup.client.socket2.socket.id,
           {
             body: 'This is the body',
@@ -342,13 +348,13 @@ describe('socketio', () => {
         // Wait for server to receive action event
         await waitForSocketIoServerToReceiveEvent<Contract>(
           setup.server.socket,
-          'requestResponseError'
+          'actions.requestResponseError'
         )
 
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'requestResponseError',
+          path: 'actions.requestResponseError',
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,

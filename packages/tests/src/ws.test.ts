@@ -18,7 +18,7 @@ const PostSchema = z.object({
 })
 
 const c = initContract()
-const contract = c.actions({
+const contract = c.router({
   actions: {
     fireAndForget: {
       input: PostSchema.omit({ id: true }),
@@ -75,7 +75,7 @@ describe('ws', () => {
       // Assert action handler has been called with correct parameters
       await vi.waitFor(() => expect(actionHandler).toHaveBeenCalledTimes(1))
       expect(actionHandler).toHaveBeenCalledWith({
-        path: 'fireAndForget',
+        path: 'actions.fireAndForget',
         ctx: context,
         input: actionPayload,
         emitEventTo: setup.server.adapter.emitTo,
@@ -97,7 +97,7 @@ describe('ws', () => {
           ...ACTIONS_MOCK,
           fireAndForgetWithEmit: tsIo.action('fireAndForgetWithEmit').handler(
             actionHandler.mockImplementation(({ emitEventTo }) => {
-              emitEventTo('onActionResponse', setup.client.socket2.socket.id, {
+              emitEventTo('listeners.onActionResponse', setup.client.socket2.socket.id, {
                 id: 'post-1',
                 title: 'This is the title',
                 body: 'This is the body',
@@ -131,7 +131,7 @@ describe('ws', () => {
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'fireAndForgetWithEmit',
+          path: 'actions.fireAndForgetWithEmit',
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,
@@ -140,7 +140,7 @@ describe('ws', () => {
         // Assert server action has emitted an event to a client with correct parameters
         expect(emitToAdapter).toHaveBeenCalledTimes(1)
         expect(emitToAdapter).toHaveBeenCalledWith(
-          'onActionResponse',
+          'listeners.onActionResponse',
           setup.client.socket2.socket.id,
           {
             body: 'This is the body',
@@ -194,7 +194,7 @@ describe('ws', () => {
         // Assert action handler has been called with correct parameters
         await vi.waitFor(() => expect(actionHandler).toHaveBeenCalledTimes(1))
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'requestResponse',
+          path: 'actions.requestResponse',
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,
@@ -219,7 +219,7 @@ describe('ws', () => {
             actionHandler.mockImplementation(({ input, emitEventTo }) => {
               const { title, body } = input
               const newPost = { id: 'post-1', title, body }
-              emitEventTo('onActionResponse', setup.client.socket2.socket.id, newPost)
+              emitEventTo('listeners.onActionResponse', setup.client.socket2.socket.id, newPost)
               return { success: true, data: newPost }
             })
           ),
@@ -250,7 +250,7 @@ describe('ws', () => {
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'requestResponseWithEmit',
+          path: 'actions.requestResponseWithEmit',
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,
@@ -259,7 +259,7 @@ describe('ws', () => {
         // Assert server action has emitted an event to a client with correct parameters
         expect(emitToAdapter).toHaveBeenCalledTimes(1)
         expect(emitToAdapter).toHaveBeenCalledWith(
-          'onActionResponse',
+          'listeners.onActionResponse',
           setup.client.socket2.socket.id,
           {
             body: 'This is the body',
@@ -320,7 +320,7 @@ describe('ws', () => {
         // Assert action handler has been called with correct parameters
         expect(actionHandler).toHaveBeenCalledTimes(1)
         expect(actionHandler).toHaveBeenCalledWith({
-          path: 'requestResponseError',
+          path: 'actions.requestResponseError',
           input: actionPayload,
           ctx: context,
           emitEventTo: setup.server.adapter.emitTo,

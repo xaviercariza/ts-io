@@ -1,4 +1,5 @@
 import { ZodType, z } from 'zod'
+import { AnyContractRouter } from './contract'
 
 const unsetMarker = Symbol('unsetMarker')
 type UnsetMarker = typeof unsetMarker
@@ -33,10 +34,11 @@ type IoListener = ListenerOptions & { data: z.ZodSchema | Zod.ZodVoid }
 type IoActions = Record<string, IoAction>
 type IoListeners = Record<string, IoListener>
 
-type IoContract = {
-  actions: IoActions
-  listeners?: IoListeners
-}
+// type IoContract = {
+//   actions: IoActions
+//   listeners?: IoListeners
+// }
+type IoContract = AnyContractRouter
 
 type TSuccessResponse<Data> = { success: true; data: Data }
 type ErrorResponse = { success: false; error: string }
@@ -85,21 +87,21 @@ type InferSocketListeners<Contract extends IoContract> = {
 }
 
 export type {
-  UnsetMarker,
-  DefaultValue,
-  ParseSchema,
   ActionOptions,
+  DefaultValue,
   InferContractActions,
   InferContractListeners,
+  InferSocketActions,
+  InferSocketListeners,
   IoAction,
   IoActions,
   IoContract,
   IoListener,
   IoListeners,
+  ParseSchema,
   TActionWithAck,
   TBaseAction,
   TResponse,
   TSuccessResponse,
-  InferSocketActions,
-  InferSocketListeners,
+  UnsetMarker,
 }

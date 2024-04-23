@@ -4,7 +4,7 @@ import { describe, expectTypeOf, it, vi } from 'vitest'
 import { z } from 'zod'
 
 const c = initContract()
-const contract = c.actions({
+const contract = c.router({
   actions: {
     fireAndForget: {
       input: z.object({ message: z.string() }),
@@ -46,7 +46,7 @@ describe('server', () => {
       expectTypeOf(fireAndForgetAction).parameter(0).toEqualTypeOf<{
         path: string
         input: { message: string }
-        emitTo: EmitEventToFunction<typeof contract.listeners>
+        emitTo: EmitEventToFunction<typeof contract>
       }>()
     })
   })
@@ -87,7 +87,7 @@ describe('server', () => {
       expectTypeOf(fireAndForgetAction.handler)
         .parameter(0)
         .parameter(0)
-        .toMatchTypeOf<{ emitEventTo: EmitEventToFunction<typeof contract.listeners> }>()
+        .toMatchTypeOf<{ emitEventTo: EmitEventToFunction<typeof contract> }>()
     })
 
     it('infers action return type correctly', () => {
@@ -98,7 +98,7 @@ describe('server', () => {
       expectTypeOf(fireAndForgetAction).parameter(0).toEqualTypeOf<{
         path: string
         input: { message: string }
-        emitTo: EmitEventToFunction<typeof contract.listeners>
+        emitTo: EmitEventToFunction<typeof contract>
       }>()
       expectTypeOf(fireAndForgetAction).returns.toEqualTypeOf<MaybePromise<void>>()
 
@@ -108,7 +108,7 @@ describe('server', () => {
       expectTypeOf(requestResponseAction).parameter(0).toEqualTypeOf<{
         path: string
         input: { message: string }
-        emitTo: EmitEventToFunction<typeof contract.listeners>
+        emitTo: EmitEventToFunction<typeof contract>
       }>()
       expectTypeOf(requestResponseAction).returns.toEqualTypeOf<
         MaybePromise<

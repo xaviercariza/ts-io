@@ -1,25 +1,25 @@
-import { IoListeners, TResponse, UnsetMarker } from '../types'
+import { IoContract, TResponse, UnsetMarker } from '../types'
 import { EmitEventToFunction } from './emitter'
 import { MaybePromise } from './types'
 
-export interface ActionCallOptions<Listeners extends IoListeners | undefined, TInput> {
+export interface ActionCallOptions<Contract extends IoContract, TInput> {
   path: string
   input: TInput
-  emitTo: EmitEventToFunction<Listeners>
+  emitTo: EmitEventToFunction<Contract>
 }
 
-type ActionResolverParams<Listeners extends IoListeners, TContext, TInput> = {
+type ActionResolverParams<Contract extends IoContract, TContext, TInput> = {
   ctx: TContext
   input: TInput
-  emitEventTo: EmitEventToFunction<Listeners>
+  emitEventTo: EmitEventToFunction<Contract>
 }
 
 export type AnyActionResolver = ActionResolver<any, any, any, any>
-export type ActionResolver<Listeners extends IoListeners, TContext, TInput, TOutput> = (
-  params: ActionResolverParams<Listeners, TContext, TInput>
+export type ActionResolver<Contract extends IoContract, TContext, TInput, TOutput> = (
+  params: ActionResolverParams<Contract, TContext, TInput>
 ) => MaybePromise<TOutput extends UnsetMarker ? void : TResponse<TOutput>>
 
 export type AnyAction = Action<any, any, any>
-export type Action<Listeners extends IoListeners | undefined, TInput, TOutput> = (
-  params: ActionCallOptions<Listeners, TInput>
+export type Action<Contract extends IoContract, TInput, TOutput> = (
+  params: ActionCallOptions<Contract, TInput>
 ) => TOutput extends UnsetMarker ? MaybePromise<void> : MaybePromise<TResponse<TOutput>>

@@ -1,3 +1,4 @@
+export type { AnyContractRouter, Leaves, ActionPaths, ListenerPaths } from './contract'
 export { initContract } from './contract'
 export type {
   IoContract,
@@ -13,5 +14,4 @@ export type { TsIoServerAdapter, TsIoClientAdapter, TsIoServerEmitter } from './
 export { initNewClient } from './client'
 export type { TsIoClient } from './client'
 export { initTsIo, attachTsIoToWebSocket } from './server/server'
-export { type Router } from './server/router'
 export { type EmitEventToFunction } from './server/emitter'

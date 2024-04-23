@@ -9,7 +9,7 @@ const PostSchema = z.object({
 })
 
 const c = initContract()
-const contract = c.actions({
+const contract = c.router({
   actions: {
     actionWithoutMiddlewares: {
       input: PostSchema.omit({ id: true }),
@@ -21,6 +21,7 @@ const contract = c.actions({
       input: PostSchema.omit({ id: true }),
     },
   },
+  listeners: {},
 })
 
 const initialContext = { userName: 'Xavier' }

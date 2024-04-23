@@ -1,40 +1,42 @@
 import { TsIoServerAdapter } from '../adapter-types'
-import { IoAction, IoContract, ParseSchema, TActionWithAck } from '../types'
+import { AnyContractRouter, Leaves, ValueAtPath, getContractActionsSchemaByPath } from '../contract'
+import { IoAction, TActionWithAck } from '../types'
 import { createBuilder } from './action-builder'
 import { createMiddlewareFactory } from './middleware'
-import { createTsIoRouter, type Router } from './router'
+import { AnyRouter, createTsIoRouter, isRouterAction } from './router'
 
-type InferActionInput<Action extends IoAction> = Action['input']
-type InferActionOutput<Action extends IoAction> = Action extends TActionWithAck
-  ? Action['response']
-  : undefined
-
-function initTsIo<TInitialContext extends object, Contract extends IoContract>(
+function initTsIo<TInitialContext extends object, Contract extends AnyContractRouter>(
   context: TInitialContext,
   contract: Contract
 ) {
   return {
     middleware: createMiddlewareFactory<TInitialContext>(),
-    action: <ActionKey extends keyof Contract['actions']>(actionKey: ActionKey) => {
+    action: <ActionKey extends Leaves<Contract['actions']>>(actionKey: ActionKey) => {
+      const schema = getContractActionsSchemaByPath(contract.actions, actionKey) as ValueAtPath<
+        Contract,
+        `actions.${ActionKey}`
+      >
+      type ActionSchema = typeof schema
       type BuilderDefinition = {
-        listeners: Contract['listeners']
+        contract: Contract
         ctx: TInitialContext
-        input: InferActionInput<Contract['actions'][ActionKey]>
-        output: InferActionOutput<Contract['actions'][ActionKey]>
+        input: ActionSchema extends IoAction ? ActionSchema['input'] : undefined
+        output: ActionSchema extends TActionWithAck ? ActionSchema['response'] : undefined
       }
 
       return createBuilder<BuilderDefinition>({
         context,
-        input: contract.actions[actionKey].input,
+        input: (schema as IoAction).input,
       })
     },
     router: createTsIoRouter(contract),
   }
 }
 
-const attachTsIoToWebSocket = <Contract extends IoContract>(
-  router: Router<Contract>,
-  adapter: TsIoServerAdapter<any>
+const attachTsIoToWebSocket = <Router extends AnyRouter>(
+  router: Router,
+  adapter: TsIoServerAdapter<any>,
+  path: string = 'actions'
 ) => {
   Object.keys(router).forEach(key => {
     const action = router[key]
@@ -42,10 +44,17 @@ const attachTsIoToWebSocket = <Contract extends IoContract>(
       throw new Error(`Can not find ${key} action`)
     }
 
-    adapter.on(key, async (input: ParseSchema<Contract['actions'][typeof key]['input']>) => {
+    if (!isRouterAction(action)) {
+      return attachTsIoToWebSocket(action, adapter, `${path}.${key}`)
+    }
+
+    const actionPath = `${path}.${key}`
+
+    adapter.on(actionPath, async input => {
       const actionResult = await action({
-        path: key,
+        path: actionPath,
         input,
+        // @ts-expect-error TODO: FIX THIS
         emitTo: adapter.emitTo,
       })
       return actionResult as any

@@ -1,7 +1,7 @@
 import {
-  InferContractActions,
-  InferContractListeners,
+  ActionPaths,
   IoContract,
+  ListenerPaths,
   TsIoClient,
   TsIoServerAdapter,
   initNewClient,
@@ -16,7 +16,7 @@ import { TClientSocket, TServerSocket } from '.'
 
 function waitForSocketIoClientToReceiveEvent<Contract extends IoContract>(
   clientSocket: TClientSocket<Contract>,
-  event: keyof InferContractListeners<Contract> | 'connect'
+  event: ListenerPaths<Contract> | 'connect'
 ) {
   return new Promise<any>(resolve => {
     clientSocket.on(event as any, resolve)
@@ -25,7 +25,7 @@ function waitForSocketIoClientToReceiveEvent<Contract extends IoContract>(
 
 function waitForSocketIoServerToReceiveEvent<Contract extends IoContract>(
   serverSocket: TServerSocket<Contract> | undefined,
-  event: keyof InferContractActions<Contract>
+  event: ActionPaths<Contract>
 ) {
   return new Promise<any>(resolve => {
     serverSocket?.on(event as any, resolve)
@@ -114,7 +114,7 @@ async function setupSocketIo<Contract extends IoContract>(contract: Contract) {
   return { setup, closeConnections }
 }
 
-export { setupSocketIo, waitForSocketIoServerToReceiveEvent, waitForSocketIoClientToReceiveEvent }
+export { setupSocketIo, waitForSocketIoClientToReceiveEvent, waitForSocketIoServerToReceiveEvent }
 
 // import {
 //   IoContract,

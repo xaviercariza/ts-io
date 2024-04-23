@@ -1,5 +1,5 @@
 import { ZodType } from 'zod'
-import { DefaultValue, IoListeners, ParseSchema, UnsetMarker } from '../types'
+import { DefaultValue, IoContract, ParseSchema, UnsetMarker } from '../types'
 import { Action, ActionCallOptions, ActionResolver, AnyAction, AnyActionResolver } from './action'
 import {
   AnyMiddlewareFn,
@@ -24,7 +24,7 @@ type AnyActionBuilderDef = ActionBuilderDef
 type AnyActionBuilder = ActionBuilder<any, any, any, any, any>
 
 export interface ActionBuilder<
-  Listeners extends IoListeners,
+  Contract extends IoContract,
   TInitialContext, // initial context
   TContextOverrides, // latest context
   TInput,
@@ -36,15 +36,15 @@ export interface ActionBuilder<
       | MiddlewareBuilder<Overwrite<TInitialContext, TContextOverrides>, TContextOut, TInput>
       | MiddlewareFunction<TInitialContext, TContextOverrides, TContextOut, TInput>
   ): ActionBuilder<
-    Listeners,
+    Contract,
     TInitialContext,
     Overwrite<TContextOverrides, TContextOut>,
     TInput,
     TOutput
   >
   handler(
-    resolver: ActionResolver<Listeners, TContextOverrides, TInput, TOutput>
-  ): Action<Listeners, TInput, DefaultValue<TOutput, UnsetMarker>>
+    resolver: ActionResolver<Contract, TContextOverrides, TInput, TOutput>
+  ): Action<Contract, TInput, DefaultValue<TOutput, UnsetMarker>>
 }
 
 function createNewBuilder(
@@ -59,8 +59,8 @@ function createNewBuilder(
   })
 }
 
-type BuilderDefinition<Listeners extends IoListeners, TContext extends object, TInput, TOutput> = {
-  listeners: Listeners
+type BuilderDefinition<Contract extends IoContract, TContext extends object, TInput, TOutput> = {
+  contract: Contract
   ctx: TContext
   input: TInput
   output: TOutput
@@ -69,7 +69,7 @@ type BuilderDefinition<Listeners extends IoListeners, TContext extends object, T
 export function createBuilder<Definition extends BuilderDefinition<any, any, any, any>>(
   initDef: Partial<AnyActionBuilderDef> = {}
 ): ActionBuilder<
-  Definition['listeners'],
+  Definition['contract'],
   Definition['ctx'],
   object,
   ParseSchema<Definition['input']>,
