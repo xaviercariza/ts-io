@@ -1,9 +1,4 @@
-import type {
-  ContractActions,
-  ContractListeners,
-  ContractRouterType,
-  TsIoClientAdapter,
-} from '@tsio/core'
+import type { ContractListeners, ContractRouterType, TsIoClientAdapter } from '@tsio/core'
 import WebSocket from 'ws'
 
 function generateRequestId(): string {

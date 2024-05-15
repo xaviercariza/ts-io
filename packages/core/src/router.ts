@@ -25,7 +25,7 @@ type Router<Contract extends ContractRouterType, RootContract extends ContractRo
       : never
 }
 
-type RouterActions<
+type RouterActionsBuilder<
   Contract extends ContractRouterType,
   TInitialContext,
   RootContract extends ContractRouterType,
@@ -33,7 +33,7 @@ type RouterActions<
   [K in keyof Contract as K extends ContractPaths<Contract, 'listener'>
     ? never
     : K]: Contract[K] extends ContractRouterType
-    ? RouterActions<Contract[K], TInitialContext, RootContract>
+    ? RouterActionsBuilder<Contract[K], TInitialContext, RootContract>
     : Contract[K] extends ContractAction
       ? ActionBuilder<
           RootContract,
@@ -53,52 +53,34 @@ interface RouterCreator<
 > {
   create(
     createActions: (
-      actions: RouterActions<TContract, TContext, RootContract>
+      actions: RouterActionsBuilder<TContract, TContext, RootContract>
     ) => Router<TContract, RootContract>
   ): Router<TContract, RootContract>
   create(router: Router<TContract, RootContract>): Router<TContract, RootContract>
 }
 
-type FilterRouterKeys<T extends ContractRouterType> = {
-  [K in keyof T]: T[K] extends ContractRouterType ? K : never
+type RoutersKeys<T extends ContractRouterType> = {
+  [K in keyof T]?: T[K] extends ContractRouterType ? K | RoutersKeys<T[K]> : never
 }[keyof T]
 
-type NestedRouterKeys<T extends ContractRouterType> = {
-  [K in FilterRouterKeys<T>]?: T[K] extends ContractRouterType ? K | NestedRouterKeys<T[K]> : never
-}[FilterRouterKeys<T>]
+type GetRouterTypeByKey<T extends ContractRouterType, Key extends keyof any> = Key extends keyof T
+  ? T[Key]
+  : {
+      [P in keyof T]: T[P] extends ContractRouterType ? GetRouterTypeByKey<T[P], Key> : never
+    }[keyof T]
 
-type GetRouterTypeByKey<T extends ContractRouterType, Key extends string> = T extends {
-  [K in Key]: infer R
-}
-  ? R
-  : T extends ContractRouterType
-    ? {
-        [K in keyof T]: T[K] extends ContractRouterType ? GetRouterTypeByKey<T[K], Key> : never
-      }[keyof T]
-    : never
-
-type Routes<
+type Routers<
   TContract extends ContractRouterType,
   TContext extends object,
   RootContract extends ContractRouterType,
-> = {
-  [K in NestedRouterKeys<TContract> & string]: GetRouterTypeByKey<
+> = RouterCreator<TContract, TContext, RootContract> & {
+  [K in RoutersKeys<TContract> & string]: GetRouterTypeByKey<
     TContract,
     K
   > extends ContractRouterType
     ? RouterCreator<GetRouterTypeByKey<TContract, K>, TContext, RootContract>
     : never
 }
-
-type RouterBuilder<
-  TContract extends ContractRouterType,
-  TContext extends object,
-  RootContract extends ContractRouterType,
-> = RouterCreator<TContract, TContext, RootContract> & Routes<TContract, TContext, RootContract>
-
-// const isRouter = (action: AnyTsIoRouter | AnyAction): action is AnyTsIoRouter => {
-//   return typeof action !== 'function'
-// }
 
 const createContractActions = <
   TContract extends ContractRouterType,
@@ -107,7 +89,7 @@ const createContractActions = <
 >(
   contract: TContract,
   context: TContext
-): RouterActions<TContract, TContext, RootContract> => {
+): RouterActionsBuilder<TContract, TContext, RootContract> => {
   return Object.entries(contract).reduce((acc, [key, subRouter]) => {
     if (isContractRouter(subRouter)) {
       return { ...acc, [key]: createContractActions(subRouter, context) }
@@ -132,7 +114,7 @@ const createContractActions = <
         input: subRouter.input,
       }) as TActionBuilder,
     }
-  }, {}) as RouterActions<TContract, TContext, RootContract>
+  }, {}) as RouterActionsBuilder<TContract, TContext, RootContract>
 }
 
 const getRouterCreator = <TContract extends ContractRouterType, TContext extends object>(
@@ -154,7 +136,7 @@ const RESTRICTED_ROUTER_NAMES: string[] = []
 function extractRouters<TContract extends ContractRouterType, TContext extends object>(
   contract: TContract,
   context: TContext
-): Routes<TContract, TContext, TContract> {
+): Routers<TContract, TContext, TContract> {
   const routers: Record<string, AnyRouterCreator> = {}
 
   function traverse(node: ContractRouterType) {
@@ -174,13 +156,13 @@ function extractRouters<TContract extends ContractRouterType, TContext extends o
 
   traverse(contract)
 
-  return routers as Routes<TContract, TContext, TContract>
+  return routers as Routers<TContract, TContext, TContract>
 }
 
 function createRouterFactory<TContract extends ContractRouterType, TContext extends object>(
   contract: TContract,
   context: TContext
-): RouterBuilder<TContract, TContext, TContract> {
+): Routers<TContract, TContext, TContract> {
   return { ...getRouterCreator(contract, context), ...extractRouters(contract, context) }
 }
 

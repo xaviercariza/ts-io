@@ -27,7 +27,7 @@ const contract = defineContract({
 })
 
 const initialContext = { userName: 'Xavier' }
-const s = initTsIo(initialContext)
+const s = initTsIo(contract, initialContext)
 const emptyContextMiddleware = s.middleware(
   vi.fn().mockImplementation(opts => {
     return opts.next()
@@ -44,25 +44,23 @@ const userMiddleware = s.middleware(
   })
 )
 
-const r = s.router(contract)
 const actionWithoutMiddlewaresHandler = vi.fn()
 const actionWithEmptyMiddlewareHandler = vi.fn()
 const actionWithUserMiddlewareHandler = vi.fn()
 
-const router = r.create(a => ({
-  actionsRouter: {
-    actionWithoutMiddlewares: a.actionsRouter.actionWithoutMiddlewares.handler(
-      actionWithoutMiddlewaresHandler
-    ),
-    actionWithEmptyMiddleware: a.actionsRouter.actionWithEmptyMiddleware
-      .use(emptyContextMiddleware)
-      .handler(actionWithEmptyMiddlewareHandler),
-    actionWithUserMiddleware: a.actionsRouter.actionWithUserMiddleware
-      .use(userMiddleware)
-      .handler(actionWithUserMiddlewareHandler),
-  },
-  listenersRouter: {},
+const actionsRouter = s.router.actionsRouter.create(a => ({
+  actionWithoutMiddlewares: a.actionWithoutMiddlewares.handler(actionWithoutMiddlewaresHandler),
+  actionWithEmptyMiddleware: a.actionWithEmptyMiddleware
+    .use(emptyContextMiddleware)
+    .handler(actionWithEmptyMiddlewareHandler),
+  actionWithUserMiddleware: a.actionWithUserMiddleware
+    .use(userMiddleware)
+    .handler(actionWithUserMiddlewareHandler),
 }))
+const router = s.router.create({
+  actionsRouter,
+  listenersRouter: {},
+})
 
 describe('middlewares', () => {
   it('should call handler w/ initial context', async () => {

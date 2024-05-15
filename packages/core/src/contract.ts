@@ -50,10 +50,6 @@ const isActionWithAck = (action: TActionWithAck | TBaseAction): action is TActio
   return (action as TActionWithAck).response !== undefined
 }
 
-export type GetRouterListeners<T extends ContractRouterType> = {
-  [K in keyof T]: T[K] extends ContractListener ? K : never
-}
-
 type AnyContractActions = ContractActions<any>
 type ContractActions<Contract extends ContractRouterType> = {
   [K in keyof Contract as Contract[K] extends ContractListener
@@ -76,21 +72,6 @@ type ContractListeners<Contract extends ContractRouterType> = {
       : never
 }
 
-type GetKeys<Obj extends object> = keyof Obj
-
-type ContractPaths<Contract extends ContractRouterType, Type extends ContractType> = GetKeys<{
-  [Path in Leaves<Contract> as FilterPathsByType<Contract, Path, Type>]: Path
-}>
-
-// UTILS
-type SplitPath<P extends string> = P extends `${infer Head}.${infer Tail}`
-  ? [Head, ...SplitPath<`${Tail}`>]
-  : P extends `${infer Last}`
-    ? [Last]
-    : []
-
-type Last<T extends any[]> = [any, ...T][T['length']]
-export type GetLastPartOFPath<Path extends string> = Last<SplitPath<Path>>
 type FilterPathsByType<
   Contract extends ContractRouterType,
   Path extends string,
@@ -109,12 +90,6 @@ type Leaves<T> = T extends object
     }[keyof T]
   : never
 
-type FiltePaths<T, Filter extends string> = T extends `${infer Prefix}.${infer _Rest}`
-  ? Prefix extends Filter
-    ? never
-    : T
-  : never
-
 type ValueAtPath<T, P> = P extends `${infer Key}.${infer Rest}`
   ? Key extends keyof T
     ? ValueAtPath<T[Key], Rest>
@@ -123,11 +98,16 @@ type ValueAtPath<T, P> = P extends `${infer Key}.${infer Rest}`
     ? T[P]
     : never
 
+type GetKeys<Obj extends object> = keyof Obj
+
+type ContractPaths<Contract extends ContractRouterType, Type extends ContractType> = GetKeys<{
+  [Path in Leaves<Contract> as FilterPathsByType<Contract, Path, Type>]: Path
+}>
+
 export { defineContract, isContractAction, isContractListener, isContractRouter, isActionWithAck }
 export type {
   TBaseAction,
   TActionWithAck,
-  // check from here
   AnyContractActions,
   AnyContractListeners,
   ContractAction,

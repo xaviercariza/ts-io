@@ -52,7 +52,7 @@ const contract = defineContract({
 })
 
 const context = { userName: 'Xavier' }
-const tsIo = initTsIo(context)
+const tsIo = initTsIo(contract, context)
 
 describe('ws', () => {
   describe('fire and forget actions', () => {
@@ -62,7 +62,7 @@ describe('ws', () => {
 
       // Create router with action
       const actionHandler = vi.fn()
-      const router = tsIo.router(contract).create(a => ({
+      const router = tsIo.router.create(a => ({
         actionsRouter: {
           ...ACTIONS_MOCK,
           fireAndForget: a.actionsRouter.fireAndForget.handler(actionHandler),
@@ -101,7 +101,7 @@ describe('ws', () => {
 
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             fireAndForgetWithEmit: a.actionsRouter.fireAndForgetWithEmit.handler(
@@ -175,7 +175,7 @@ describe('ws', () => {
 
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             requestResponse: a.actionsRouter.requestResponse.handler(
@@ -227,7 +227,7 @@ describe('ws', () => {
 
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             requestResponseWithEmit: a.actionsRouter.requestResponseWithEmit.handler(
@@ -309,7 +309,7 @@ describe('ws', () => {
 
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             requestResponseError: a.actionsRouter.requestResponseError.handler(

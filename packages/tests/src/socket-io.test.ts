@@ -58,7 +58,7 @@ const contract = defineContract({
 })
 
 const context = { userName: 'Xavier' }
-const tsIo = initTsIo(context)
+const tsIo = initTsIo(contract, context)
 
 describe('socketio', () => {
   describe('fire and forget actions', () => {
@@ -70,7 +70,7 @@ describe('socketio', () => {
 
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             fireAndForget: a.actionsRouter.fireAndForget.handler(actionHandler),
@@ -113,7 +113,7 @@ describe('socketio', () => {
 
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             fireAndForgetWithEmit: a.actionsRouter.fireAndForgetWithEmit.handler(
@@ -197,7 +197,7 @@ describe('socketio', () => {
         const { setup, closeConnections } = await socketIoFixture.setupSocketIo(contract)
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             requestResponse: a.actionsRouter.requestResponse.handler(
@@ -248,7 +248,7 @@ describe('socketio', () => {
         const { setup, closeConnections } = await socketIoFixture.setupSocketIo(contract)
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             requestResponseWithEmit: a.actionsRouter.requestResponseWithEmit.handler(
@@ -330,7 +330,7 @@ describe('socketio', () => {
         const { setup, closeConnections } = await socketIoFixture.setupSocketIo(contract)
         // Create router with action
         const actionHandler = vi.fn()
-        const router = tsIo.router(contract).create(a => ({
+        const router = tsIo.router.create(a => ({
           actionsRouter: {
             ...ACTIONS_MOCK,
             requestResponseError: a.actionsRouter.requestResponseError.handler(
