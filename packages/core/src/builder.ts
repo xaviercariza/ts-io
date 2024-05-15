@@ -1,6 +1,6 @@
 import { ZodType } from 'zod'
-import { DefaultValue, IoContract, ParseSchema, UnsetMarker } from '../types'
 import { Action, ActionCallOptions, ActionResolver, AnyAction, AnyActionResolver } from './action'
+import { ContractRouterType } from './contract'
 import {
   AnyMiddlewareFn,
   AnyMiddlewareFunctionParams,
@@ -9,7 +9,7 @@ import {
   MiddlewareResult,
   isMiddlewareResolver,
 } from './middleware'
-import { Overwrite } from './types'
+import { DefaultValue, Overwrite, ParseSchema, UnsetMarker } from './types'
 import { mergeWithoutOverrides } from './utils'
 
 type ActionBuilderDef = {
@@ -24,7 +24,7 @@ type AnyActionBuilderDef = ActionBuilderDef
 type AnyActionBuilder = ActionBuilder<any, any, any, any, any>
 
 export interface ActionBuilder<
-  Contract extends IoContract,
+  Contract extends ContractRouterType,
   TInitialContext, // initial context
   TContextOverrides, // latest context
   TInput,
@@ -59,7 +59,12 @@ function createNewBuilder(
   })
 }
 
-type BuilderDefinition<Contract extends IoContract, TContext extends object, TInput, TOutput> = {
+type BuilderDefinition<
+  Contract extends ContractRouterType,
+  TContext extends object,
+  TInput,
+  TOutput,
+> = {
   contract: Contract
   ctx: TContext
   input: TInput

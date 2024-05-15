@@ -1,5 +1,31 @@
 import { ZodType, z } from 'zod'
-import { AnyContractRouter } from './contract'
+
+type WithoutIndexSignature<TObj> = {
+  [K in keyof TObj as string extends K ? never : number extends K ? never : K]: TObj[K]
+}
+
+type Overwrite<TType, TWith> = TWith extends any
+  ? TType extends object
+    ? {
+        [K in  // Exclude index signature from keys
+          | keyof WithoutIndexSignature<TType>
+          | keyof WithoutIndexSignature<TWith>]: K extends keyof TWith
+          ? TWith[K]
+          : K extends keyof TType
+            ? TType[K]
+            : never
+      } & (string extends keyof TWith // Handle cases with an index signature
+        ? { [key: string]: TWith[string] }
+        : number extends keyof TWith
+          ? { [key: number]: TWith[number] }
+          : // eslint-disable-next-line @typescript-eslint/ban-types
+            {})
+    : TWith
+  : never
+
+type Simplify<TType> = TType extends any[] | Date ? TType : { [K in keyof TType]: TType[K] }
+
+type MaybePromise<TType> = Promise<TType> | TType
 
 const unsetMarker = Symbol('unsetMarker')
 type UnsetMarker = typeof unsetMarker
@@ -12,96 +38,8 @@ type ParseSchema<Schema extends ZodType | undefined> = Schema extends undefined
     ? z.infer<Schema>
     : never
 
-type ActionOptions = {
-  validate?: boolean
-}
-type ListenerOptions = {
-  validate?: boolean
-}
-
-type TBaseAction = {
-  input: z.ZodSchema
-  options?: ActionOptions
-}
-
-type TActionWithAck = TBaseAction & {
-  response: z.ZodSchema
-}
-
-type IoAction = TBaseAction | TActionWithAck
-type IoListener = ListenerOptions & { data: z.ZodSchema | Zod.ZodVoid }
-
-type IoActions = Record<string, IoAction>
-type IoListeners = Record<string, IoListener>
-
-// type IoContract = {
-//   actions: IoActions
-//   listeners?: IoListeners
-// }
-type IoContract = AnyContractRouter
-
 type TSuccessResponse<Data> = { success: true; data: Data }
 type ErrorResponse = { success: false; error: string }
 type TResponse<Data> = TSuccessResponse<Data> | ErrorResponse
 
-type InferContractActions<Contract extends IoContract> = {
-  [ActionKey in keyof Contract['actions']]: (
-    input: Contract['actions'][ActionKey] extends IoAction
-      ? z.infer<Contract['actions'][ActionKey]['input']>
-      : never,
-    callback: Contract['actions'][ActionKey] extends TActionWithAck
-      ? (
-          output: TResponse<z.infer<Contract['actions'][ActionKey]['response']>>
-        ) => Promise<void> | void
-      : undefined
-  ) => void
-}
-
-type InferContractListeners<Contract extends IoContract> = {
-  [ActionKey in keyof Contract['listeners']]: (
-    data: Contract['listeners'][ActionKey] extends IoListener
-      ? z.infer<Contract['listeners'][ActionKey]['data']>
-      : never
-  ) => void
-}
-
-type InferSocketActions<Contract extends IoContract> = {
-  [ActionKey in keyof Contract['actions']]: (
-    input: Contract['actions'][ActionKey] extends IoAction
-      ? z.infer<Contract['actions'][ActionKey]['input']>
-      : never,
-    callback: Contract['actions'][ActionKey] extends TActionWithAck
-      ? (
-          output: TResponse<z.infer<Contract['actions'][ActionKey]['response']>>
-        ) => Promise<void> | void
-      : undefined
-  ) => void
-}
-
-type InferSocketListeners<Contract extends IoContract> = {
-  [ActionKey in keyof Contract['listeners']]: (
-    data: Contract['listeners'][ActionKey] extends IoListener
-      ? z.infer<Contract['listeners'][ActionKey]['data']>
-      : never
-  ) => void
-}
-
-export type {
-  ActionOptions,
-  DefaultValue,
-  InferContractActions,
-  InferContractListeners,
-  InferSocketActions,
-  InferSocketListeners,
-  IoAction,
-  IoActions,
-  IoContract,
-  IoListener,
-  IoListeners,
-  ParseSchema,
-  TActionWithAck,
-  TBaseAction,
-  TResponse,
-  TSuccessResponse,
-  UnsetMarker,
-}
+export type { Overwrite, Simplify, MaybePromise, UnsetMarker, DefaultValue, ParseSchema, TResponse }

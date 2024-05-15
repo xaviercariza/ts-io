@@ -1,7 +1,6 @@
 import {
-  InferContractActions,
-  InferContractListeners,
-  IoContract,
+  ContractPaths,
+  ContractRouterType,
   TsIoClient,
   TsIoServerAdapter,
   initNewClient,
@@ -16,25 +15,25 @@ function generateSocketIdMock(): string {
   return Math.random().toString(36).substring(2, 10)
 }
 
-function waitForWsClientToReceiveEvent<Contract extends IoContract>(
+function waitForWsClientToReceiveEvent<Contract extends ContractRouterType>(
   clientSocket: ws.WebSocket,
-  event: keyof InferContractListeners<Contract> | 'connect'
+  event: ContractPaths<Contract, 'listener'> | 'connect'
 ) {
   return new Promise<any>(resolve => {
     clientSocket.on(event as any, resolve)
   })
 }
 
-function waitForWsServerToReceiveEvent<Contract extends IoContract>(
+function waitForWsServerToReceiveEvent<Contract extends ContractRouterType>(
   serverSocket: ws.WebSocket,
-  event: keyof InferContractActions<Contract>
+  event: ContractPaths<Contract, 'action'>
 ) {
   return new Promise<any>(resolve => {
     serverSocket.on(event as any, resolve)
   })
 }
 
-type SocketsSetup<Contract extends IoContract> = {
+type SocketsSetup<Contract extends ContractRouterType> = {
   wss: TsIoWebSocketServer
   server: {
     socket: TsIoWebSocket
@@ -64,7 +63,7 @@ async function initializeTsIo(wss: TsIoWebSocketServer): Promise<WsServer> {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       socket.id = uuid
-      // const socket = { ...ws, id: uuid } as TsIoWebSocket
+
       const adapter = createWsServerProxy(wss, socket)
 
       function onSocketPostError(e: Error) {
@@ -72,9 +71,6 @@ async function initializeTsIo(wss: TsIoWebSocketServer): Promise<WsServer> {
       }
 
       socket.on('error', onSocketPostError)
-      // socket.on('close', () => {
-      //   console.log('Connection closed')
-      // })
 
       resolve({
         socket,
@@ -96,27 +92,24 @@ function waitForSocketState(socket: WebSocket, state: number) {
   })
 }
 
-async function createClientSocket<Contract extends IoContract>(contract: Contract, port: number) {
+async function createClientSocket<Contract extends ContractRouterType>(
+  contract: Contract,
+  port: number
+) {
   const uuid = generateSocketIdMock()
   const socket = new WebSocket(`ws://localhost:${port}/?uuid=${uuid}`) as TsIoWebSocket
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   socket.id = uuid
 
   const adapter = createWsClientProxy(socket)
   const client = initNewClient(adapter, contract)
-
-  // socket.onopen = () => console.log('WebSocket connection established')
-  // socket.onclose = () => console.log('WebSocket connection closed')
-  // socket.onerror = () => console.log('WebSocket error')
 
   socket.emit('connection')
 
   return { socket, adapter, client }
 }
 
-async function createSockets<Contract extends IoContract>(
+async function createSockets<Contract extends ContractRouterType>(
   httpServer: http.Server,
   contract: Contract
 ) {
@@ -124,9 +117,7 @@ async function createSockets<Contract extends IoContract>(
   const port = (httpServer.address() as AddressInfo).port
 
   const socket1 = await createClientSocket(contract, port)
-  // await waitForSocketState(socket1.socket, socket1.socket.OPEN)
   const socket2 = await createClientSocket(contract, port)
-  // await waitForSocketState(socket2.socket, socket2.socket.OPEN)
 
   function onSocketPreError(e: Error) {
     console.log('onSocketPreError: ', e)
@@ -155,7 +146,7 @@ async function createSockets<Contract extends IoContract>(
   }
 }
 
-async function setupWs<Contract extends IoContract>(contract: Contract) {
+async function setupWs<Contract extends ContractRouterType>(contract: Contract) {
   const httpServer = http.createServer()
 
   const setup = await new Promise<SocketsSetup<Contract>>(resolve => {
