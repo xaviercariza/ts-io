@@ -59,27 +59,16 @@ interface RouterCreator<
   create(router: Router<TContract, RootContract>): Router<TContract, RootContract>
 }
 
-type RoutersKeys<T extends ContractRouterType> = {
-  [K in keyof T]?: T[K] extends ContractRouterType ? K | RoutersKeys<T[K]> : never
-}[keyof T]
-
-type GetRouterTypeByKey<T extends ContractRouterType, Key extends keyof any> = Key extends keyof T
-  ? T[Key]
-  : {
-      [P in keyof T]: T[P] extends ContractRouterType ? GetRouterTypeByKey<T[P], Key> : never
-    }[keyof T]
-
 type Routers<
-  TContract extends ContractRouterType,
+  T extends ContractRouterType,
   TContext extends object,
   RootContract extends ContractRouterType,
-> = RouterCreator<TContract, TContext, RootContract> & {
-  [K in RoutersKeys<TContract> & string]: GetRouterTypeByKey<
-    TContract,
-    K
-  > extends ContractRouterType
-    ? RouterCreator<GetRouterTypeByKey<TContract, K>, TContext, RootContract>
-    : never
+> = RouterCreator<T, TContext, RootContract> & {
+  [K in keyof T]: T[K] extends ContractRouterType
+    ? Routers<T[K], TContext, RootContract>
+    : T[K] extends ContractRouterType
+      ? RouterCreator<T[K], TContext, RootContract>
+      : never
 }
 
 const createContractActions = <
