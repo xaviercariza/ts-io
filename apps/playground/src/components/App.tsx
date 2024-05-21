@@ -1,56 +1,51 @@
-import { initNewClient, type TsIoClient } from '@tsio/core'
-import { createSocketIoClientAdapter } from '@tsio/socketio/client'
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
-import { io } from 'socket.io-client'
-import { chatContract, type MessageType } from '../libs/tsio/contract'
+import { useEffect, useState } from 'react'
+import type { User } from '../types'
+import { api } from '../utils/api'
+import { ChatProvider } from './ChatProvider'
+import { WelcomeScreen } from './screens/WelcomeScreen'
+import { MainScreen } from './screens/MainScreen'
+import { TsIoProvider } from './TsIoProvider'
 
 function App() {
-  const tsIoClient = useRef<TsIoClient<typeof chatContract> | null>(null)
-  const [messageValue, setMessageValue] = useState('')
-  const [messages, setMessages] = useState<MessageType[]>([])
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const socket = io({ transports: ['websocket'] })
+    async function getUser() {
+      const response = await api<User>('http://localhost:3010/api/session', {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
+      if (!response.success) {
+        console.error('Error checking session:', response.error)
+        setUser(null)
+      } else {
+        setUser(response.data)
+      }
+    }
 
-    const adapter = createSocketIoClientAdapter(socket)
-    tsIoClient.current = initNewClient(adapter, chatContract)
-    tsIoClient.current.listeners.chat.onMessageReceived(msg => {
-      setMessages(prev => [...prev, msg])
-    })
+    getUser()
 
     return () => {
-      socket.disconnect()
+      setUser(null)
     }
   }, [])
 
-  const handleSendMessage = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (tsIoClient.current && messageValue.trim()) {
-      const message = await tsIoClient.current.actions.chat.sendMessage({ message: messageValue })
-      if (message.success) {
-        setMessages(prev => [...prev, message.data])
-        setMessageValue('')
-      }
-    }
-  }
-
-  const handleMessageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    setMessageValue(e.target.value)
-  }
+  const handleOnLoggedOut = () => setUser(null)
 
   return (
-    <div>
-      <ul>
-        {messages.map(msg => (
-          <li key={msg.id}>{msg.message}</li>
-        ))}
-      </ul>
-      <form id="form" onSubmit={handleSendMessage}>
-        <input value={messageValue} onChange={handleMessageChange} autoComplete="off" />
-        <button>Send</button>
-      </form>
-    </div>
+    <>
+      {user ? (
+        <TsIoProvider>
+          <ChatProvider>
+            <MainScreen user={user} onLogOut={handleOnLoggedOut} />
+          </ChatProvider>
+        </TsIoProvider>
+      ) : (
+        <WelcomeScreen onSignUp={setUser} />
+      )}
+    </>
   )
 }
 

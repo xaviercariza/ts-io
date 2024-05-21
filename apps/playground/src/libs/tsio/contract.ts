@@ -1,18 +1,11 @@
 import { defineContract } from '@tsio/core'
-import { z } from 'zod'
-
-const MessageSchema = z.object({
-  id: z.string(),
-  message: z.string(),
-})
-
-type MessageType = z.infer<typeof MessageSchema>
+import { MessageSchema, NewMessageSchema } from './schemas'
 
 const chatContract = defineContract({
   chat: {
     sendMessage: {
       type: 'action',
-      input: MessageSchema.omit({ id: true }),
+      input: NewMessageSchema,
       response: MessageSchema,
     },
     onMessageReceived: {
@@ -22,5 +15,4 @@ const chatContract = defineContract({
   },
 })
 
-export type { MessageType }
 export { chatContract }

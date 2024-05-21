@@ -13,7 +13,6 @@ import { DefaultValue, Overwrite, ParseSchema, UnsetMarker } from './types'
 import { mergeWithoutOverrides } from './utils'
 
 type ActionBuilderDef = {
-  context: unknown
   input?: ZodType
   resolver?: AnyActionResolver
   middlewares: AnyMiddlewareFn[] // (AnyMiddlewareFunction | AnyMiddlewareResolver)[]
@@ -44,7 +43,7 @@ export interface ActionBuilder<
   >
   handler(
     resolver: ActionResolver<Contract, TContextOverrides, TInput, TOutput>
-  ): Action<Contract, TInput, DefaultValue<TOutput, UnsetMarker>>
+  ): Action<Contract, TContextOverrides, TInput, DefaultValue<TOutput, UnsetMarker>>
 }
 
 function createNewBuilder(
@@ -81,7 +80,6 @@ export function createBuilder<Definition extends BuilderDefinition<any, any, any
   ParseSchema<Definition['output']>
 > {
   const _def: AnyActionBuilderDef = {
-    context: {},
     middlewares: [],
     ...initDef,
   }
@@ -129,7 +127,7 @@ function createResolver(_defIn: AnyActionBuilderDef, resolver: AnyActionResolver
 }
 
 function createActionCaller(_def: AnyActionBuilderDef): AnyAction {
-  async function action(opts: ActionCallOptions<any, AnyActionBuilderDef['input']>) {
+  async function action(opts: ActionCallOptions<any, unknown, AnyActionBuilderDef['input']>) {
     // run the middlewares recursively with the resolver as the last one
     async function callRecursive(
       callOpts: {
@@ -137,7 +135,7 @@ function createActionCaller(_def: AnyActionBuilderDef): AnyAction {
         index: number
       } = {
         index: 0,
-        ctx: _def.context,
+        ctx: opts.ctx,
       }
     ): Promise<MiddlewareResult<any>> {
       try {

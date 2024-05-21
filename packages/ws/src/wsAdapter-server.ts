@@ -14,7 +14,7 @@ function createWsServerProxy<Action extends ContractAction>(
 ): TsIoServerAdapter<Action> {
   const emitToClient: TsIoServerEmitter = (to, data) => {
     wsServer.clients.forEach(ws => {
-      if (socket.readyState === socket.OPEN) {
+      if (ws.id === to && socket.readyState === socket.OPEN) {
         ws.send(JSON.stringify(data))
       }
     })

@@ -51,13 +51,20 @@ type TsIoClientAdapter<Contract extends ContractRouterType> = {
       ? (data: ContractListeners<Contract>[ListenerEvent]['data']) => void
       : never
   ) => void
+  unsubscribe: <ListenerEvent extends keyof ContractListeners<Contract>>(
+    event: ListenerEvent
+  ) => void
 }
 
 const isRouter = (action: AnyRouter | AnyAction): action is AnyRouter => {
   return typeof action !== 'function'
 }
 
-const attachTsIoToWebSocket = (router: AnyRouter, adapter: TsIoServerAdapter<any>) => {
+const attachTsIoToWebSocket = <TContext>(
+  router: AnyRouter,
+  adapter: TsIoServerAdapter<any>,
+  createContext: () => TContext
+) => {
   function attach(subRouter: AnyRouter, path: string = '') {
     Object.keys(subRouter).forEach(key => {
       const actionKey = key as keyof typeof subRouter
@@ -73,9 +80,11 @@ const attachTsIoToWebSocket = (router: AnyRouter, adapter: TsIoServerAdapter<any
       }
 
       adapter.on(actionPath, async input => {
+        const ctx = createContext()
         const actionResult = await action({
           path: actionPath,
           input,
+          ctx,
           // @ts-expect-error TODO: FIX THIS
           emitTo: adapter.emitTo,
         })

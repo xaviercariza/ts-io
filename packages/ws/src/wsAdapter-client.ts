@@ -51,6 +51,9 @@ function createWsClientProxy<Contract extends ContractRouterType>(
         callback(response.data)
       })
     },
+    unsubscribe: event => {
+      eventsCallbacks.delete(event)
+    },
   }
 }
 

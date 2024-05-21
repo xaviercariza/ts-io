@@ -10,15 +10,20 @@ import {
 } from './contract'
 import { ParseSchema, UnsetMarker } from './types'
 
-type AnyRouter = Router<any, any>
-type Router<Contract extends ContractRouterType, RootContract extends ContractRouterType> = {
+type AnyRouter = Router<any, any, any>
+type Router<
+  Contract extends ContractRouterType,
+  TContext,
+  RootContract extends ContractRouterType,
+> = {
   [K in keyof Contract as Contract[K] extends ContractAction | ContractRouterType
     ? K
     : never]: Contract[K] extends ContractRouterType
-    ? Router<Contract[K], RootContract>
+    ? Router<Contract[K], TContext, RootContract>
     : Contract[K] extends ContractAction
       ? Action<
           RootContract,
+          TContext,
           ParseSchema<Contract[K]['input']>,
           Contract[K] extends TActionWithAck ? ParseSchema<Contract[K]['response']> : UnsetMarker
         >
@@ -54,9 +59,11 @@ interface RouterCreator<
   create(
     createActions: (
       actions: RouterActionsBuilder<TContract, TContext, RootContract>
-    ) => Router<TContract, RootContract>
-  ): Router<TContract, RootContract>
-  create(router: Router<TContract, RootContract>): Router<TContract, RootContract>
+    ) => Router<TContract, TContext, RootContract>
+  ): Router<TContract, TContext, RootContract>
+  create(
+    router: Router<TContract, TContext, RootContract>
+  ): Router<TContract, TContext, RootContract>
 }
 
 type Routers<
@@ -76,12 +83,11 @@ const createContractActions = <
   TContext extends object,
   RootContract extends ContractRouterType,
 >(
-  contract: TContract,
-  context: TContext
+  contract: TContract
 ): RouterActionsBuilder<TContract, TContext, RootContract> => {
   return Object.entries(contract).reduce((acc, [key, subRouter]) => {
     if (isContractRouter(subRouter)) {
-      return { ...acc, [key]: createContractActions(subRouter, context) }
+      return { ...acc, [key]: createContractActions(subRouter) }
     }
 
     if (isContractListener(subRouter)) {
@@ -99,7 +105,6 @@ const createContractActions = <
     return {
       ...acc,
       [key]: createBuilder({
-        context,
         input: subRouter.input,
       }) as TActionBuilder,
     }
@@ -107,13 +112,12 @@ const createContractActions = <
 }
 
 const getRouterCreator = <TContract extends ContractRouterType, TContext extends object>(
-  router: TContract,
-  context: TContext
+  router: TContract
 ): RouterCreator<TContract, TContext, TContract> => {
   return {
     create: createActions => {
       if (typeof createActions === 'function') {
-        return createActions(createContractActions(router, context))
+        return createActions(createContractActions(router))
       }
 
       return createActions
@@ -123,8 +127,7 @@ const getRouterCreator = <TContract extends ContractRouterType, TContext extends
 
 const RESTRICTED_ROUTER_NAMES: string[] = []
 function extractRouters<TContract extends ContractRouterType, TContext extends object>(
-  contract: TContract,
-  context: TContext
+  contract: TContract
 ): Routers<TContract, TContext, TContract> {
   const routers: Record<string, AnyRouterCreator> = {}
 
@@ -136,7 +139,7 @@ function extractRouters<TContract extends ContractRouterType, TContext extends o
           if (RESTRICTED_ROUTER_NAMES.includes(key)) {
             throw new Error(`Router name "${key}" is restricted and cannot be used.`)
           }
-          routers[key] = getRouterCreator(subRouter, context)
+          routers[key] = getRouterCreator(subRouter)
           traverse(subRouter as ContractRouterType)
         }
       }
@@ -149,10 +152,9 @@ function extractRouters<TContract extends ContractRouterType, TContext extends o
 }
 
 function createRouterFactory<TContract extends ContractRouterType, TContext extends object>(
-  contract: TContract,
-  context: TContext
+  contract: TContract
 ): Routers<TContract, TContext, TContract> {
-  return { ...getRouterCreator(contract, context), ...extractRouters(contract, context) }
+  return { ...getRouterCreator(contract), ...extractRouters(contract) }
 }
 
 export type { RouterCreator, Router, AnyRouter }

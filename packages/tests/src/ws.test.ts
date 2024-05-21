@@ -3,6 +3,8 @@ import { describe, expect, vi } from 'vitest'
 import { z } from 'zod'
 import { socketsTest } from './utils'
 
+type Context = { userName: string }
+
 const ACTIONS_MOCK = {
   fireAndForget: vi.fn(),
   fireAndForgetWithEmit: vi.fn(),
@@ -51,8 +53,9 @@ const contract = defineContract({
   },
 })
 
-const context = { userName: 'Xavier' }
-const tsIo = initTsIo(contract, context)
+const context: Context = { userName: 'Xavier' }
+const tsIo = initTsIo.context<Context>().create(contract)
+const createContext = () => context
 
 describe('ws', () => {
   describe('fire and forget actions', () => {
@@ -71,7 +74,7 @@ describe('ws', () => {
       }))
 
       // Attach router to socket
-      wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+      wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
 
       // Run action
       const actionPayload = {
@@ -118,7 +121,7 @@ describe('ws', () => {
         }))
 
         // Attach router to socket
-        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
 
         // Prepare
         const emitToAdapter = vi.spyOn(setup.server.adapter, 'emitTo')
@@ -194,7 +197,7 @@ describe('ws', () => {
         }))
 
         // Attach router to socket
-        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
 
         // Prepare
         const actionPayload = {
@@ -247,7 +250,7 @@ describe('ws', () => {
         }))
 
         // Attach router to socket
-        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
 
         // Prepare
         const emitToAdapter = vi.spyOn(setup.server.adapter, 'emitTo')
@@ -322,7 +325,7 @@ describe('ws', () => {
         }))
 
         // Attach router to socket
-        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter)
+        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
 
         // Prepare
         const actionPayload = {

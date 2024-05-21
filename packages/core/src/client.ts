@@ -27,7 +27,7 @@ type ActionWithAck<Action extends TActionWithAck> = (
 
 type ListenerFunction<Listener extends ContractListener> = (
   callback: (response: z.infer<Listener['data']>) => void
-) => void
+) => { unsubscribe: () => void }
 
 type ClientAction<Action> = Action extends TActionWithAck
   ? ActionWithAck<Action>
@@ -36,7 +36,7 @@ type ClientAction<Action> = Action extends TActionWithAck
     : never
 
 type ClientListener<Listener> = Listener extends ContractListener
-  ? (callback: (response: z.infer<Listener['data']>) => void) => void
+  ? ListenerFunction<Listener>
   : never
 
 type RecursiveActionsProxyObj<Actions extends AnyContractActions> = {
@@ -92,6 +92,12 @@ const getListener = <Listener extends ContractListener, Adapter extends TsIoClie
 ): ListenerFunction<Listener> => {
   return callback => {
     adapter.on(listenerKey as any, callback)
+    return {
+      unsubscribe: () => {
+        console.log('UNSUBSCRIBIIIING')
+        adapter.unsubscribe(listenerKey)
+      },
+    }
   }
 }
 

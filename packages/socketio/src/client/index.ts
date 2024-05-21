@@ -15,6 +15,9 @@ function createSocketIoClientAdapter<Contract extends ContractRouterType>(
     on: (event, callback) => {
       socket.on(event as string, callback)
     },
+    unsubscribe: event => {
+      socket.off(event)
+    },
   }
 }
 

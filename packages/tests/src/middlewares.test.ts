@@ -26,8 +26,10 @@ const contract = defineContract({
   listenersRouter: {},
 })
 
+type Context = { userName: string }
+
 const initialContext = { userName: 'Xavier' }
-const s = initTsIo(contract, initialContext)
+const s = initTsIo.context<Context>().create(contract)
 const emptyContextMiddleware = s.middleware(
   vi.fn().mockImplementation(opts => {
     return opts.next()
@@ -65,6 +67,7 @@ const router = s.router.create({
 describe('middlewares', () => {
   it('should call handler w/ initial context', async () => {
     await router.actionsRouter.actionWithoutMiddlewares({
+      ctx: initialContext,
       path: 'action-key',
       input: {
         title: 'This is the title',
@@ -81,6 +84,7 @@ describe('middlewares', () => {
     )
 
     await router.actionsRouter.actionWithEmptyMiddleware({
+      ctx: initialContext,
       path: 'action-key',
       input: {
         title: 'This is the title',
@@ -99,6 +103,7 @@ describe('middlewares', () => {
 
   it('should call handler w/ updated context from middleware', async () => {
     await router.actionsRouter.actionWithUserMiddleware({
+      ctx: initialContext,
       path: 'action-key',
       input: {
         title: 'This is the title',

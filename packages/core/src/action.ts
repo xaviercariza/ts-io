@@ -2,8 +2,9 @@ import { ContractRouterType } from './contract'
 import { EmitEventToFunction } from './emitter'
 import { MaybePromise, TResponse, UnsetMarker } from './types'
 
-interface ActionCallOptions<Contract extends ContractRouterType, TInput> {
+interface ActionCallOptions<Contract extends ContractRouterType, TContext, TInput> {
   path: string
+  ctx: TContext
   input: TInput
   emitTo: EmitEventToFunction<Contract>
 }
@@ -19,9 +20,9 @@ type ActionResolver<Contract extends ContractRouterType, TContext, TInput, TOutp
   params: ActionResolverParams<Contract, TContext, TInput>
 ) => MaybePromise<TOutput extends UnsetMarker ? void : TResponse<TOutput>>
 
-type AnyAction = Action<any, any, any>
-type Action<Contract extends ContractRouterType, TInput, TOutput> = (
-  params: ActionCallOptions<Contract, TInput>
+type AnyAction = Action<any, any, any, any>
+type Action<Contract extends ContractRouterType, TContext, TInput, TOutput> = (
+  params: ActionCallOptions<Contract, TContext, TInput>
 ) => TOutput extends UnsetMarker ? MaybePromise<void> : MaybePromise<TResponse<TOutput>>
 
 export type { ActionCallOptions, AnyActionResolver, ActionResolver, AnyAction, Action }
