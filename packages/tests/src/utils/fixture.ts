@@ -1,4 +1,3 @@
-/* eslint-disable no-empty-pattern */
 import { attachTsIoToWebSocket } from '@tsio/core'
 import { test } from 'vitest'
 import { setupSocketIo } from './socketio'
@@ -16,10 +15,10 @@ type SocketsFixture = {
 }
 
 export const socketsTest = test.extend<SocketsFixture>({
-  socketIoFixture: async ({}, use) => {
+  socketIoFixture: async (_, use) => {
     await use({ setupSocketIo, attachTsIoToWebSocket })
   },
-  wsFixture: async ({}, use) => {
+  wsFixture: async (_, use) => {
     await use({ setupWs, attachTsIoToWebSocket })
   },
 })

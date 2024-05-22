@@ -4,7 +4,7 @@
   "keywords": [],
   "license": "MIT",
   "author": "Xavier Cardona",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "exports": {
     "./package.json": "./package.json",
     "./client": {
