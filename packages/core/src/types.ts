@@ -7,14 +7,14 @@ type WithoutIndexSignature<TObj> = {
 type Overwrite<TType, TWith> = TWith extends any
   ? TType extends object
     ? {
-        [K in  // Exclude index signature from keys
+        [K in
           | keyof WithoutIndexSignature<TType>
           | keyof WithoutIndexSignature<TWith>]: K extends keyof TWith
           ? TWith[K]
           : K extends keyof TType
             ? TType[K]
             : never
-      } & (string extends keyof TWith // Handle cases with an index signature
+      } & (string extends keyof TWith
         ? { [key: string]: TWith[string] }
         : number extends keyof TWith
           ? { [key: number]: TWith[number] }

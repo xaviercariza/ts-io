@@ -15,7 +15,7 @@ import { mergeWithoutOverrides } from './utils'
 type ActionBuilderDef = {
   input?: ZodType
   resolver?: AnyActionResolver
-  middlewares: AnyMiddlewareFn[] // (AnyMiddlewareFunction | AnyMiddlewareResolver)[]
+  middlewares: AnyMiddlewareFn[]
 }
 
 type AnyActionBuilderDef = ActionBuilderDef
@@ -24,8 +24,8 @@ type AnyActionBuilder = ActionBuilder<any, any, any, any, any>
 
 export interface ActionBuilder<
   Contract extends ContractRouterType,
-  TInitialContext, // initial context
-  TContextOverrides, // latest context
+  TInitialContext,
+  TContextOverrides,
   TInput,
   TOutput,
 > {
@@ -128,7 +128,6 @@ function createResolver(_defIn: AnyActionBuilderDef, resolver: AnyActionResolver
 
 function createActionCaller(_def: AnyActionBuilderDef): AnyAction {
   async function action(opts: ActionCallOptions<any, unknown, AnyActionBuilderDef['input']>) {
-    // run the middlewares recursively with the resolver as the last one
     async function callRecursive(
       callOpts: {
         ctx: any
@@ -178,13 +177,11 @@ function createActionCaller(_def: AnyActionBuilderDef): AnyAction {
       }
     }
 
-    // there's always at least one "next" since we wrap this.resolver in a middlewareq
     const result = await callRecursive()
     if (!result) {
       throw new Error('No result from middlewares - did you forget to `return next()`?')
     }
     if (!result.ok) {
-      // re-throw original error
       throw result.error
     }
     return result.data
