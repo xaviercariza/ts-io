@@ -2,7 +2,7 @@
   "name": "@tsio/playground",
   "description": "tsio playground app",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "start": "ts-node src/server.ts"
   },
