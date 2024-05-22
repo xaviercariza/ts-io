@@ -72,8 +72,6 @@ function ChatProvider({ children }: ChatProviderProps) {
     chats: {},
     activeChat: null,
   })
-  // NOTE: you *might* need to memoize this value
-  // Learn more in http://kcd.im/optimize-context
   const value = { state, dispatch }
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
 }

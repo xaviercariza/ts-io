@@ -13,7 +13,7 @@ async function logOut() {
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include', // Ensure cookies are included with the request
+    credentials: 'include',
   })
 
   if (!res.success) {
@@ -25,13 +25,10 @@ async function logOut() {
 }
 
 export function SideBar({ user, onLoggedOut }: Props) {
-  const [loading, setLoading] = useState(false)
-  const [loadingChats, setLoadingChats] = useState(false)
   const chat = useChat()
 
   useEffect(() => {
     async function getChats() {
-      setLoadingChats(true)
       const res = await api<Group[]>('http://localhost:3010/api/chats', {
         method: 'GET',
         headers: {
@@ -43,7 +40,6 @@ export function SideBar({ user, onLoggedOut }: Props) {
       } else {
         chat.dispatch({ type: 'INIT', payload: { chats: res.data } })
       }
-      setLoadingChats(false)
     }
 
     getChats()

@@ -1,11 +1,10 @@
 import React, { useState, type ChangeEvent } from 'react'
 import type { User } from '../../types'
-import { Button } from '../Button'
-import { Card } from '../Card'
-import { Input } from '../Input'
-import { Spinner } from '../Spinner'
 import { api } from '../../utils/api'
+import { Button } from '../Button'
+import { Input } from '../Input'
 import { Layout } from '../Layout'
+import { Spinner } from '../Spinner'
 
 type Props = {
   onSignUp: (user: User) => void
@@ -15,7 +14,7 @@ async function checkNicknameAvailability(nickname: string) {
   return await api<boolean>('http://localhost:3010/api/nickname', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json', // Ensures the server treats the incoming body as JSON
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ nickname }),
   })
@@ -25,7 +24,7 @@ async function registerUser(nickname: string, password: string) {
   return await api<User>('http://localhost:3010/api/login', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json', // Ensures the server treats the incoming body as JSON
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ nickname, password }),
   })

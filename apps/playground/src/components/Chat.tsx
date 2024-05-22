@@ -57,7 +57,6 @@ export function Chat({ user }: Props) {
       <Card
         header={<Header right={<SearchAction user={user} />} />}
         fullScreen
-        // className="flex items-center justify-center"
         className="overflow-hidden relative"
       >
         <div className="absolute inset-0 h-full pattern-dots" />
