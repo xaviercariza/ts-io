@@ -9,9 +9,7 @@ function createSocketIoServerAdapter<Action extends ContractAction>(
 ): TsIoServerAdapter<Action> {
   const emitToClient: TsIoServerEmitter = (socketId, response) => {
     const { event, data } = response
-    // broadcast to all clients in the current namespace except the sender for testing purposes
     socket.broadcast.emit(event, data)
-    // socket.to(socketId).emit(event, data)
   }
 
   return {

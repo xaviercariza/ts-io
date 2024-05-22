@@ -18,27 +18,3 @@ class TsIoBuilder<TContext extends object> {
 const initTsIo = new TsIoBuilder()
 
 export { initTsIo }
-
-// import { attachTsIoToWebSocket } from './adapter'
-// import { ContractRouterType } from './contract'
-// import { createMiddlewareFactory } from './middleware'
-// import { createRouterFactory } from './router'
-
-// interface TsIo<TContract extends ContractRouterType, TContext extends object> {
-//   router: ReturnType<typeof createRouterFactory<TContract, TContext>>
-//   middleware: ReturnType<typeof createMiddlewareFactory<TContext>>
-//   attachRouterToSocket: typeof attachTsIoToWebSocket
-// }
-
-// function initTsIo<TContract extends ContractRouterType, TContext extends object>(
-//   contract: TContract,
-//   context: TContext
-// ): TsIo<TContract, TContext> {
-//   return {
-//     router: createRouterFactory(contract, context),
-//     middleware: createMiddlewareFactory<TContext>(),
-//     attachRouterToSocket: attachTsIoToWebSocket,
-//   }
-// }
-
-// export  {initTsIo }
