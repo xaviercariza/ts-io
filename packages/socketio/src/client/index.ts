@@ -1,7 +1,7 @@
-import { type IoContract, type TsIoClientAdapter } from '@tsio/core'
+import { ContractRouterType, type TsIoClientAdapter } from '@tsio/core'
 import { Socket } from 'socket.io-client'
 
-function createSocketIoClientAdapter<Contract extends IoContract>(
+function createSocketIoClientAdapter<Contract extends ContractRouterType>(
   socket: Socket
 ): TsIoClientAdapter<Contract> {
   return {
@@ -14,6 +14,9 @@ function createSocketIoClientAdapter<Contract extends IoContract>(
     },
     on: (event, callback) => {
       socket.on(event as string, callback)
+    },
+    unsubscribe: event => {
+      socket.off(event)
     },
   }
 }

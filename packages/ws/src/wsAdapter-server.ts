@@ -1,4 +1,4 @@
-import { IoAction, TsIoServerAdapter, TsIoServerEmitter } from '@tsio/core'
+import { ContractAction, TsIoServerAdapter, TsIoServerEmitter } from '@tsio/core'
 import { v4 as uuidv4 } from 'uuid'
 import ws, { WebSocketServer } from 'ws'
 
@@ -8,14 +8,13 @@ export type TsIoWebSocketServer = Omit<WebSocketServer, 'clients'> & {
   clients: Set<TsIoWebSocket>
 }
 
-function createWsServerProxy<Action extends IoAction>(
+function createWsServerProxy<Action extends ContractAction>(
   wsServer: TsIoWebSocketServer,
   socket: TsIoWebSocket
 ): TsIoServerAdapter<Action> {
   const emitToClient: TsIoServerEmitter = (to, data) => {
     wsServer.clients.forEach(ws => {
-      // @FIXME: BROADCAST TO ALL CLIENTS FOR TESTING PURPOSES
-      if (/* ws.id === socketId &&  */ socket.readyState === socket.OPEN) {
+      if (ws.id === to && socket.readyState === socket.OPEN) {
         ws.send(JSON.stringify(data))
       }
     })

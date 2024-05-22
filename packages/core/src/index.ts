@@ -1,17 +1,17 @@
-export { initContract } from './contract'
-export type {
-  IoContract,
-  IoAction,
-  TResponse,
-  InferContractActions,
-  InferContractListeners,
-  InferSocketActions,
-  InferSocketListeners,
-} from './types'
-export type { MaybePromise } from './server/types'
-export type { TsIoServerAdapter, TsIoClientAdapter, TsIoServerEmitter } from './adapter-types'
+export { attachTsIoToWebSocket } from './adapter'
+export type { TsIoClientAdapter, TsIoServerAdapter, TsIoServerEmitter } from './adapter'
 export { initNewClient } from './client'
 export type { TsIoClient } from './client'
-export { initTsIo, attachTsIoToWebSocket } from './server/server'
-export { type Router } from './server/router'
-export { type EmitEventToFunction } from './server/emitter'
+export { defineContract } from './contract'
+export type {
+  ContractAction,
+  ContractActions,
+  ContractListeners,
+  ContractPaths,
+  ContractRouterType,
+} from './contract'
+export { initTsIo } from './initTsIo'
+export { mergeContracts } from './utils'
+export type { Router, RouterCreator } from './router'
+export type { MiddlewareResult, MiddlewareBuilder } from './middleware'
+export type { ActionCallOptions } from './action'

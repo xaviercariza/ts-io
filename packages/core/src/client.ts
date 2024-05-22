@@ -1,15 +1,21 @@
 import { z } from 'zod'
-import { TsIoClientAdapter } from './adapter-types'
+import { TsIoClientAdapter } from './adapter'
 import {
-  IoActions,
-  IoContract,
-  IoListener,
-  IoListeners,
+  AnyContractActions,
+  AnyContractListeners,
+  ContractAction,
+  ContractActions,
+  ContractListener,
+  ContractListeners,
+  ContractRouterType,
   TActionWithAck,
   TBaseAction,
-  TResponse,
-} from './types'
-import { isBasicAction, isIoActionWithAck, isIoListener } from './type-utils'
+  isActionWithAck,
+  isContractAction,
+  isContractListener,
+  isContractRouter,
+} from './contract'
+import { TResponse } from './types'
 
 type BasicAction<Action extends TBaseAction> = (
   body: z.infer<Action['input']>
@@ -19,30 +25,52 @@ type ActionWithAck<Action extends TActionWithAck> = (
   body: z.infer<Action['input']>
 ) => Promise<TResponse<z.infer<Action['response']>>> | TResponse<z.infer<Action['response']>>
 
-type ListenerFunction<Listener extends IoListener> = (
+type ListenerFunction<Listener extends ContractListener> = (
   callback: (response: z.infer<Listener['data']>) => void
-) => void
+) => { unsubscribe: () => void }
 
-type RecursiveActionsProxyObj<Actions extends IoActions> = {
-  [Key in keyof Actions]: Actions[Key] extends IoActions
+type ClientAction<Action> = Action extends TActionWithAck
+  ? ActionWithAck<Action>
+  : Action extends TBaseAction
+    ? BasicAction<Action>
+    : never
+
+type ClientListener<Listener> = Listener extends ContractListener
+  ? ListenerFunction<Listener>
+  : never
+
+type RecursiveActionsProxyObj<Actions extends AnyContractActions> = {
+  [Key in keyof Actions]: Actions[Key] extends ContractRouterType
     ? RecursiveActionsProxyObj<Actions[Key]>
-    : Actions[Key] extends TActionWithAck
-      ? ActionWithAck<Actions[Key]>
-      : BasicAction<Actions[Key]>
+    : Actions[Key] extends ContractAction
+      ? ClientAction<Actions[Key]>
+      : never
 }
 
-type RecursiveListenersProxyObj<Listeners extends IoListeners> = {
-  [ListenerKey in keyof Listeners]: Listeners[ListenerKey] extends IoListener
-    ? ListenerFunction<Listeners[ListenerKey]>
-    : Listeners[ListenerKey] extends IoListeners
-      ? RecursiveListenersProxyObj<Listeners[ListenerKey]>
+type RecursiveListenersProxyObj<Listeners extends AnyContractListeners> = {
+  [Key in keyof Listeners]: Listeners[Key] extends ContractRouterType
+    ? RecursiveListenersProxyObj<Listeners[Key]>
+    : Listeners[Key] extends ContractListener
+      ? ClientListener<Listeners[Key]>
       : never
+}
+
+type TsIoClientActions<Contract extends ContractRouterType> = RecursiveActionsProxyObj<
+  ContractActions<Contract>
+>
+type TsIoClientListeners<Contract extends ContractRouterType> = RecursiveListenersProxyObj<
+  ContractListeners<Contract>
+>
+
+type TsIoClient<Contract extends ContractRouterType> = {
+  actions: TsIoClientActions<Contract>
+  listeners: TsIoClientListeners<Contract>
 }
 
 const getBasicAction =
   <TAction extends TBaseAction, Adapter extends TsIoClientAdapter<any>>(
     adapter: Adapter,
-    actionKey: keyof IoActions
+    actionKey: string
   ): BasicAction<TAction> =>
   body => {
     adapter.emit(actionKey as any, body)
@@ -50,7 +78,7 @@ const getBasicAction =
 const getActionWithAck =
   <TAction extends TActionWithAck, Adapter extends TsIoClientAdapter<any>>(
     adapter: Adapter,
-    actionKey: keyof IoActions
+    actionKey: string
   ): ActionWithAck<TAction> =>
   body => {
     return new Promise<TResponse<z.infer<TAction['response']>>>(resolve => {
@@ -58,57 +86,92 @@ const getActionWithAck =
     })
   }
 
-const getListener = <Listener extends IoListener, Adapter extends TsIoClientAdapter<any>>(
+const getListener = <Listener extends ContractListener, Adapter extends TsIoClientAdapter<any>>(
   adapter: Adapter,
-  listenerKey: keyof IoListeners
+  listenerKey: string
 ): ListenerFunction<Listener> => {
   return callback => {
     adapter.on(listenerKey as any, callback)
+    return {
+      unsubscribe: () => {
+        console.log('UNSUBSCRIBIIIING')
+        adapter.unsubscribe(listenerKey)
+      },
+    }
   }
 }
 
-type TsIoClient<Contract extends IoContract> = {
-  actions: Contract['actions'] extends IoActions
-    ? RecursiveActionsProxyObj<Contract['actions']>
-    : never
-  listeners: Contract['listeners'] extends IoListeners
-    ? RecursiveListenersProxyObj<Contract['listeners']>
-    : never
+const createClientActions = <
+  TContract extends ContractRouterType,
+  Adapter extends TsIoClientAdapter<ContractRouterType>,
+>(
+  contract: TContract,
+  adapter: Adapter,
+  path = ''
+): TsIoClientActions<TContract> => {
+  return Object.entries(contract).reduce((acc, [key, subRouter]) => {
+    const actionPath = path ? `${path}.${key}` : key
+
+    if (isContractRouter(subRouter)) {
+      return { ...acc, [key]: createClientActions(subRouter, adapter, actionPath) }
+    }
+
+    if (isContractListener(subRouter)) {
+      return acc
+    }
+
+    if (!isActionWithAck(subRouter)) {
+      return {
+        ...acc,
+        [key]: getBasicAction(adapter, actionPath),
+      }
+    }
+
+    return {
+      ...acc,
+      [key]: getActionWithAck(adapter, actionPath),
+    }
+  }, {} as TsIoClientActions<TContract>)
 }
 
-const initNewClient = <Contract extends IoContract, Adapter extends TsIoClientAdapter<IoContract>>(
+const createClientListeners = <
+  TContract extends ContractRouterType,
+  Adapter extends TsIoClientAdapter<ContractRouterType>,
+>(
+  contract: TContract,
+  adapter: Adapter,
+  path = ''
+): TsIoClientListeners<TContract> => {
+  return Object.entries(contract).reduce((acc, [key, subRouter]) => {
+    const listenerPath = path ? `${path}.${key}` : key
+
+    if (isContractRouter(subRouter)) {
+      return { ...acc, [key]: createClientListeners(subRouter, adapter, listenerPath) }
+    }
+
+    if (isContractAction(subRouter)) {
+      return acc
+    }
+
+    return {
+      ...acc,
+      [key]: getListener(adapter, listenerPath),
+    }
+  }, {} as TsIoClientListeners<TContract>)
+}
+
+const initNewClient = <
+  Contract extends ContractRouterType,
+  Adapter extends TsIoClientAdapter<ContractRouterType>,
+>(
   adapter: Adapter,
   contract: Contract
 ): TsIoClient<Contract> => {
   return {
-    actions:
-      contract.actions &&
-      Object.fromEntries(
-        Object.entries(contract.actions).map(([key, subContract]) => {
-          const actionKey = key as keyof IoActions
-          if (isIoActionWithAck(subContract)) {
-            return [key, getActionWithAck(adapter, actionKey)]
-          } else if (isBasicAction(subContract)) {
-            return [key, getBasicAction(adapter, actionKey)]
-          } else {
-            return [key, initNewClient(adapter, subContract)]
-          }
-        })
-      ),
-    listeners:
-      contract.listeners &&
-      Object.fromEntries(
-        Object.entries(contract.listeners).map(([key, subListener]) => {
-          if (isIoListener(subListener)) {
-            const listenerKey = key as keyof IoListeners
-            return [key, getListener(adapter, listenerKey)]
-          } else {
-            return [key, initNewClient(adapter, subListener)]
-          }
-        })
-      ),
+    actions: createClientActions(contract, adapter),
+    listeners: createClientListeners(contract, adapter),
   }
 }
 
-export type { TsIoClient }
 export { initNewClient }
+export type { TsIoClient }

@@ -1,0 +1,14 @@
+{
+  "extends": "@total-typescript/tsconfig/tsc/dom/app",
+  "compilerOptions": {
+    "module": "ES2020",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx"
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "verbatimModuleSyntax": false
+    }
+  }
+}

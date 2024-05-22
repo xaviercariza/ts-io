@@ -1,4 +1,4 @@
-import { initContract, initTsIo } from '@tsio/core'
+import { defineContract, initTsIo } from '@tsio/core'
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
@@ -8,39 +8,33 @@ const PostSchema = z.object({
   body: z.string().optional(),
 })
 
-const c = initContract()
-const contract = c.actions({
-  actions: {
+const contract = defineContract({
+  actionsRouter: {
     actionWithoutMiddlewares: {
+      type: 'action',
       input: PostSchema.omit({ id: true }),
     },
     actionWithEmptyMiddleware: {
+      type: 'action',
       input: PostSchema.omit({ id: true }),
     },
     actionWithUserMiddleware: {
+      type: 'action',
       input: PostSchema.omit({ id: true }),
     },
   },
+  listenersRouter: {},
 })
 
+type Context = { userName: string }
+
 const initialContext = { userName: 'Xavier' }
-const s = initTsIo(initialContext, contract)
-
-const actionWithoutMiddlewaresHandler = vi.fn()
-const actionWithoutMiddlewares = s
-  .action('actionWithoutMiddlewares')
-  .handler(actionWithoutMiddlewaresHandler)
-
+const s = initTsIo.context<Context>().create(contract)
 const emptyContextMiddleware = s.middleware(
   vi.fn().mockImplementation(opts => {
     return opts.next()
   })
 )
-const actionWithEmptyMiddlewareHandler = vi.fn()
-const actionWithEmptyMiddleware = s
-  .action('actionWithEmptyMiddleware')
-  .use(emptyContextMiddleware)
-  .handler(actionWithEmptyMiddlewareHandler)
 
 const userMiddleware = s.middleware(
   vi.fn().mockImplementation(opts => {
@@ -51,21 +45,29 @@ const userMiddleware = s.middleware(
     })
   })
 )
-const actionWithUserMiddlewareHandler = vi.fn()
-const actionWithUserMiddleware = s
-  .action('actionWithUserMiddleware')
-  .use(userMiddleware)
-  .handler(actionWithUserMiddlewareHandler)
 
-const router = s.router({
-  actionWithoutMiddlewares,
-  actionWithEmptyMiddleware,
-  actionWithUserMiddleware,
+const actionWithoutMiddlewaresHandler = vi.fn()
+const actionWithEmptyMiddlewareHandler = vi.fn()
+const actionWithUserMiddlewareHandler = vi.fn()
+
+const actionsRouter = s.router.actionsRouter.create(a => ({
+  actionWithoutMiddlewares: a.actionWithoutMiddlewares.handler(actionWithoutMiddlewaresHandler),
+  actionWithEmptyMiddleware: a.actionWithEmptyMiddleware
+    .use(emptyContextMiddleware)
+    .handler(actionWithEmptyMiddlewareHandler),
+  actionWithUserMiddleware: a.actionWithUserMiddleware
+    .use(userMiddleware)
+    .handler(actionWithUserMiddlewareHandler),
+}))
+const router = s.router.create({
+  actionsRouter,
+  listenersRouter: {},
 })
 
 describe('middlewares', () => {
   it('should call handler w/ initial context', async () => {
-    await router.actionWithoutMiddlewares({
+    await router.actionsRouter.actionWithoutMiddlewares({
+      ctx: initialContext,
       path: 'action-key',
       input: {
         title: 'This is the title',
@@ -81,7 +83,8 @@ describe('middlewares', () => {
       })
     )
 
-    await router.actionWithEmptyMiddleware({
+    await router.actionsRouter.actionWithEmptyMiddleware({
+      ctx: initialContext,
       path: 'action-key',
       input: {
         title: 'This is the title',
@@ -99,7 +102,8 @@ describe('middlewares', () => {
   })
 
   it('should call handler w/ updated context from middleware', async () => {
-    await router.actionWithUserMiddleware({
+    await router.actionsRouter.actionWithUserMiddleware({
+      ctx: initialContext,
       path: 'action-key',
       input: {
         title: 'This is the title',
