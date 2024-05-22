@@ -1,5 +1,13 @@
 # @tsio/socketio
 
+## 0.0.2
+
+### Patch Changes
+
+- 990da5f: Allow nested routers
+- Updated dependencies [990da5f]
+  - @tsio/core@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes
