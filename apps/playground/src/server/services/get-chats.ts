@@ -1,4 +1,4 @@
-import { prisma } from '../../libs/prisma'
+import { prisma } from '../prisma'
 import type { Group, Response } from '../../types'
 
 const getChats = async (userId: string): Promise<Response<Group[] | null>> => {

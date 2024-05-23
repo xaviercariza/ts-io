@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 import type { Group, UserProfile } from '../types'
 import { api } from '../utils/api'
 import { Avatar } from './Avatar'
@@ -43,7 +44,7 @@ export function SideBar({ user, onLoggedOut }: Props) {
     }
 
     getChats()
-  }, [user])
+  }, [chat.dispatch])
 
   const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -89,6 +90,7 @@ export function SideBar({ user, onLoggedOut }: Props) {
               return (
                 <button
                   key={c.id}
+                  type="button"
                   onClick={handleConversationClicked(c.id)}
                   className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
                 >

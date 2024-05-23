@@ -1,4 +1,4 @@
-import { prisma } from '../../libs/prisma'
+import { prisma } from '../prisma'
 
 const disconnectUser = async (userId: string) => {
   await prisma.user.update({

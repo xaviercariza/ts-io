@@ -1,6 +1,6 @@
-import { ContractRouterType } from './contract'
-import { EmitEventToFunction } from './emitter'
-import { MaybePromise, TResponse, UnsetMarker } from './types'
+import type { ContractRouterType } from './contract'
+import type { EmitEventToFunction } from './emitter'
+import type { MaybePromise, TResponse, UnsetMarker } from './types'
 
 interface ActionCallOptions<Contract extends ContractRouterType, TContext, TInput> {
   path: string

@@ -1,6 +1,6 @@
-import { z } from 'zod'
-import { AnyAction } from './action'
-import {
+import type { z } from 'zod'
+import type { AnyAction } from './action'
+import type {
   ContractAction,
   ContractActions,
   ContractListener,
@@ -9,8 +9,8 @@ import {
   TActionWithAck,
   TBaseAction,
 } from './contract'
-import { AnyRouter } from './router'
-import { MaybePromise, TResponse } from './types'
+import type { AnyRouter } from './router'
+import type { MaybePromise, TResponse } from './types'
 
 type TsIoServerHandler<Action extends ContractAction> = Action extends TActionWithAck
   ? (input: Action['input']) => Promise<TResponse<z.infer<Action['response']>>>
@@ -44,7 +44,7 @@ type TsIoClientAdapter<Contract extends ContractRouterType> = {
         ? (response: TResponse<ContractListeners<Contract>[ListenerEvent]['data']>) => void
         : never
       : never
-  ) => Promise<any> | void
+  ) => void
   on: <ListenerEvent extends keyof ContractListeners<Contract>>(
     action: ListenerEvent,
     cb: ContractListeners<Contract>[ListenerEvent] extends ContractListener
@@ -65,7 +65,7 @@ const attachTsIoToWebSocket = <TContext>(
   adapter: TsIoServerAdapter<any>,
   createContext: () => TContext
 ) => {
-  function attach(subRouter: AnyRouter, path: string = '') {
+  function attach(subRouter: AnyRouter, path = '') {
     Object.keys(subRouter).forEach(key => {
       const actionKey = key as keyof typeof subRouter
       const action = subRouter[actionKey]

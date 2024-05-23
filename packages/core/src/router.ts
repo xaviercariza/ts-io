@@ -1,14 +1,14 @@
-import { Action } from './action'
-import { ActionBuilder, createBuilder } from './builder'
+import type { Action } from './action'
+import { type ActionBuilder, createBuilder } from './builder'
 import {
-  ContractAction,
-  ContractPaths,
-  ContractRouterType,
-  TActionWithAck,
+  type ContractAction,
+  type ContractPaths,
+  type ContractRouterType,
+  type TActionWithAck,
   isContractListener,
   isContractRouter,
 } from './contract'
-import { ParseSchema, UnsetMarker } from './types'
+import type { ParseSchema, UnsetMarker } from './types'
 
 type AnyRouter = Router<any, any, any>
 type Router<

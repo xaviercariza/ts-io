@@ -1,6 +1,6 @@
 import express from 'express'
 import session from 'express-session'
-import http from 'http'
+import http from 'node:http'
 import { createServer as createViteServer } from 'vite'
 import { createIOServer } from './io'
 import { getAllUser, getChats, getUser, searchUserChats, signIn } from './server/services'
@@ -52,9 +52,8 @@ async function createMainServer() {
   app.get('/api/session', (req, res) => {
     if (req.session?.user) {
       return res.send(req.session.user)
-    } else {
-      return res.status(401).send({ loggedIn: false })
     }
+    return res.status(401).send({ loggedIn: false })
   })
   app.post('/api/nickname', async (req, res) => {
     const { nickname } = req.body

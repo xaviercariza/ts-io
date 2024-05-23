@@ -1,9 +1,9 @@
 import { createSocketIoServerAdapter } from '@tsio/socketio/server'
 import type express from 'express'
-import http from 'http'
+import type http from 'node:http'
 import { Server } from 'socket.io'
-import { chatRouter } from './libs/tsio/router'
-import { attachRouterToSocket } from './libs/tsio/tsio'
+import { chatRouter } from './server/tsio/router'
+import { attachRouterToSocket } from './server/tsio/tsio'
 import { connectUser, disconnectUser } from './server/services'
 
 const createIOServer = (server: http.Server, sessionMiddleware: express.RequestHandler) => {

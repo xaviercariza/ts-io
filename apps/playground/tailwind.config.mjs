@@ -7,12 +7,12 @@ export default {
     extend: {},
   },
   plugins: [
-    plugin(function ({ addUtilities }) {
+    plugin(({ addUtilities }) => {
       const newUtilities = {
         '.pattern-dots': {
           opacity: '0.06',
           backgroundColor: '#ffffff',
-          backgroundImage: `radial-gradient(#6366F1 calc(20px * 0.1), #ffffff calc(20px * 0.1))`,
+          backgroundImage: 'radial-gradient(#6366F1 calc(20px * 0.1), #ffffff calc(20px * 0.1))',
           backgroundSize: '15px 15px',
         },
       }

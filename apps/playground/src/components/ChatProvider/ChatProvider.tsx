@@ -18,7 +18,10 @@ function chatReducer(state: State, action: Action): State {
     case 'INIT': {
       return {
         ...state,
-        chats: action.payload.chats.reduce((acc, curr) => ({ ...acc, [curr.id]: curr }), {}),
+        chats: action.payload.chats.reduce<Record<string, Group>>((acc, curr) => {
+          acc[curr.id] = curr
+          return acc
+        }, {}),
       }
     }
     case 'OPEN_CHAT': {

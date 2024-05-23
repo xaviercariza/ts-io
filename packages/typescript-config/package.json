@@ -1,9 +1,0 @@
-{
-  "name": "@tsio/typescript-config",
-  "description": "Custom eslint config for tsio",
-  "private": true,
-  "version": "0.0.0",
-  "publishConfig": {
-    "access": "public"
-  }
-}

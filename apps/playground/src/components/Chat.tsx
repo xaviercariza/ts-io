@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import type React from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import type { UserProfile } from '../types'
 import { Avatar } from './Avatar'
 import { Button } from './Button'
@@ -61,7 +62,13 @@ export function Chat({ user }: Props) {
       >
         <div className="absolute inset-0 h-full pattern-dots" />
         <div className="w-full h-full flex flex-col items-center justify-center">
-          <img width="30%" height="30%" src="/images/empty_folder.webp" className="opacity-25" />
+          <img
+            alt="no active chat"
+            width="30%"
+            height="30%"
+            src="/images/empty_folder.webp"
+            className="opacity-25"
+          />
           <span className="text-2xl text-slate-300 font-bold">No conversation started yet</span>
         </div>
       </Card>
@@ -135,12 +142,13 @@ export function Chat({ user }: Props) {
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
+                  <title>Send message</title>
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
                     d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  ></path>
+                  />
                 </svg>
               )}
             </span>

@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import { prisma } from '../../libs/prisma'
+import { prisma } from '../prisma'
 import type { Response, UserProfile } from '../../types'
 
 const signIn = async (nickname: string, password: string): Promise<Response<UserProfile>> => {

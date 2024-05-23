@@ -12,16 +12,11 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
-    "types-check": "tsc --noemit",
-    "lint": "eslint .",
-    "lint:fix": "pnpm run lint --fix"
+    "types-check": "tsc --noemit"
   },
   "devDependencies": {
-    "@tsio/eslint-config": "workspace:^",
-    "@tsio/typescript-config": "workspace:^",
     "@types/node": "^20.11.24",
     "@types/uuid": "^9.0.8",
-    "eslint": "^8.57.0",
     "tsup": "^8.0.1",
     "typescript": "^5.4.2",
     "zod": "^3.22.4"

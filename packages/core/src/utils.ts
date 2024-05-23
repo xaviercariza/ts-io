@@ -1,4 +1,4 @@
-import { ContractRouterType } from './contract'
+import type { ContractRouterType } from './contract'
 
 type Merge<T, U> = (T extends object
   ? {

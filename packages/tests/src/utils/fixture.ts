@@ -15,10 +15,10 @@ type SocketsFixture = {
 }
 
 export const socketsTest = test.extend<SocketsFixture>({
-  socketIoFixture: async (_, use) => {
+  socketIoFixture: async ({}, use) => {
     await use({ setupSocketIo, attachTsIoToWebSocket })
   },
-  wsFixture: async (_, use) => {
+  wsFixture: async ({}, use) => {
     await use({ setupWs, attachTsIoToWebSocket })
   },
 })

@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 type Props = { header?: ReactNode; fullScreen?: boolean; className?: string; children: ReactNode }

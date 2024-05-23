@@ -1,5 +1,5 @@
-import { ContractRouterType, type TsIoClientAdapter } from '@tsio/core'
-import { Socket } from 'socket.io-client'
+import type { ContractRouterType, TsIoClientAdapter } from '@tsio/core'
+import type { Socket } from 'socket.io-client'
 
 function createSocketIoClientAdapter<Contract extends ContractRouterType>(
   socket: Socket

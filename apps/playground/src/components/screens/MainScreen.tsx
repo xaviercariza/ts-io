@@ -25,7 +25,7 @@ export function MainScreen({ user, onLogOut }: Proops) {
         listener.unsubscribe()
       }
     }
-  }, [])
+  }, [chat.dispatch, tsIo])
 
   return (
     <Layout>

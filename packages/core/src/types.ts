@@ -1,4 +1,4 @@
-import { ZodType, z } from 'zod'
+import type { ZodType, z } from 'zod'
 
 type WithoutIndexSignature<TObj> = {
   [K in keyof TObj as string extends K ? never : number extends K ? never : K]: TObj[K]
@@ -18,8 +18,7 @@ type Overwrite<TType, TWith> = TWith extends any
         ? { [key: string]: TWith[string] }
         : number extends keyof TWith
           ? { [key: number]: TWith[number] }
-          : // eslint-disable-next-line @typescript-eslint/ban-types
-            {})
+          : Record<string, any>)
     : TWith
   : never
 

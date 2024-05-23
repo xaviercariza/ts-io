@@ -1,4 +1,4 @@
-import { AnyEmitEventToFunction } from './emitter'
+import type { AnyEmitEventToFunction } from './emitter'
 import type { Overwrite, Simplify } from './types'
 
 interface MiddlewareOKResult<_TContextOverride> {
@@ -31,16 +31,14 @@ export type MiddlewareFunctionParams<TContext, TContextOverridesIn, TInput> = {
 }
 export type AnyMiddlewareFunctionParams = MiddlewareFunctionParams<any, any, any>
 
-export type MiddlewareFunction<TContext, TContextOverridesIn, $ContextOverridesOut, TInput> = {
-  (
-    opts: MiddlewareFunctionParams<TContext, TContextOverridesIn, TInput> & {
-      next: {
-        (): Promise<MiddlewareResult<TContext>>
-        <TNextContext>(opts: { ctx?: TNextContext }): Promise<MiddlewareResult<TNextContext>>
-      }
+export type MiddlewareFunction<TContext, TContextOverridesIn, $ContextOverridesOut, TInput> = (
+  opts: MiddlewareFunctionParams<TContext, TContextOverridesIn, TInput> & {
+    next: {
+      (): Promise<MiddlewareResult<TContext>>
+      <TNextContext>(opts: { ctx?: TNextContext }): Promise<MiddlewareResult<TNextContext>>
     }
-  ): Promise<MiddlewareResult<$ContextOverridesOut>>
-}
+  }
+) => Promise<MiddlewareResult<$ContextOverridesOut>>
 type Middleware<TContext, TContextOverridesIn, $ContextOverridesOut, TInput> = {
   type: 'middleware'
   fn: MiddlewareFunction<TContext, TContextOverridesIn, $ContextOverridesOut, TInput>
@@ -51,13 +49,11 @@ export type MiddlewareResolverFunction<
   TContextOverridesIn,
   $ContextOverridesOut,
   TInput,
-> = {
-  (
-    opts: MiddlewareFunctionParams<TContext, TContextOverridesIn, TInput> & {
-      emitEventTo: AnyEmitEventToFunction
-    }
-  ): Promise<MiddlewareResult<$ContextOverridesOut>>
-}
+> = (
+  opts: MiddlewareFunctionParams<TContext, TContextOverridesIn, TInput> & {
+    emitEventTo: AnyEmitEventToFunction
+  }
+) => Promise<MiddlewareResult<$ContextOverridesOut>>
 type MiddlewareResolver<TContext, TContextOverridesIn, $ContextOverridesOut, TInput> = {
   type: 'resolver'
   fn: MiddlewareResolverFunction<TContext, TContextOverridesIn, $ContextOverridesOut, TInput>

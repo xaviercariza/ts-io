@@ -1,5 +1,5 @@
 import type { ContractListeners, ContractRouterType, TsIoClientAdapter } from '@tsio/core'
-import WebSocket from 'ws'
+import type WebSocket from 'ws'
 
 function generateRequestId(): string {
   return Math.random().toString(36).substring(2, 10)

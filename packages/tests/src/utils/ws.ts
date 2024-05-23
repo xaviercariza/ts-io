@@ -1,15 +1,16 @@
 import {
-  ContractPaths,
-  ContractRouterType,
-  TsIoClient,
-  TsIoServerAdapter,
+  type ContractPaths,
+  type ContractRouterType,
+  type TsIoClient,
+  type TsIoServerAdapter,
   initNewClient,
 } from '@tsio/core'
 import { createWsClientProxy } from '@tsio/ws/client'
-import { TsIoWebSocket, TsIoWebSocketServer, createWsServerProxy } from '@tsio/ws/server'
+import { type TsIoWebSocket, type TsIoWebSocketServer, createWsServerProxy } from '@tsio/ws/server'
 import http from 'node:http'
-import { AddressInfo } from 'node:net'
-import ws, { WebSocket, WebSocketServer } from 'ws'
+import type { AddressInfo } from 'node:net'
+import type ws from 'ws'
+import { WebSocket, WebSocketServer } from 'ws'
 
 function generateSocketIdMock(): string {
   return Math.random().toString(36).substring(2, 10)
@@ -81,8 +82,8 @@ async function initializeTsIo(wss: TsIoWebSocketServer): Promise<WsServer> {
 }
 
 function waitForSocketState(socket: WebSocket, state: number) {
-  return new Promise<void>(function (resolve) {
-    setTimeout(function () {
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
       if (socket.readyState === state) {
         resolve()
       } else {

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import type React from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useOnClickOutside } from '../hooks/useOnClickOutside'
 import { Spinner } from './Spinner'
 import { useDebounce } from '../hooks/useDebounce'
@@ -30,7 +31,7 @@ export function SearchBar<T extends Option>({ options, onSearch, onSelect }: Pro
     if (value) {
       searchUser(value)
     }
-  }, [debouncedValue])
+  }, [debouncedValue, onSearch])
 
   const handleOpenSearch = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -53,7 +54,7 @@ export function SearchBar<T extends Option>({ options, onSearch, onSelect }: Pro
   return (
     <div ref={searchBarRef} className="relative z-50">
       <button
-        autoFocus={openSearch}
+        type="button"
         onClick={handleOpenSearch}
         className={`relative flex flex-col items-center justify-center rounded-full ${
           openSearch ? 'h-10 w-72' : 'h-10 w-10'
@@ -76,6 +77,7 @@ export function SearchBar<T extends Option>({ options, onSearch, onSelect }: Pro
             stroke="currentColor"
             className="h-6 w-6 text-indigo-400 flex-shrink-0 absolute right-0 -translate-x-1/4"
           >
+            <title>Search icon</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -93,8 +95,9 @@ export function SearchBar<T extends Option>({ options, onSearch, onSelect }: Pro
               <li
                 key={o.key}
                 id={`product-${index}`}
-                className={`py-2 px-4 flex items-center justify-between gap-8 hover:bg-gray-100 cursor-pointer hover:cursor-pointer`}
+                className="py-2 px-4 flex items-center justify-between gap-8 hover:bg-gray-100 cursor-pointer hover:cursor-pointer"
                 onClick={handleOptionClicked(o)}
+                onKeyDown={handleOptionClicked(o)}
               >
                 <p className="font-normal text-indigo-400">{o.label}</p>
               </li>

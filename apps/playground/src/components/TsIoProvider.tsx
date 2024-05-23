@@ -3,7 +3,7 @@ import { initNewClient } from '@tsio/core'
 import { createSocketIoClientAdapter } from '@tsio/socketio/client'
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import { io } from 'socket.io-client'
-import { chatContract } from '../libs/tsio/contract'
+import { chatContract } from '../server/tsio/contract'
 
 interface ChatSocketCtxState {
   tsIo: TsIoClient<typeof chatContract> | null

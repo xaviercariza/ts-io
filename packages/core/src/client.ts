@@ -1,21 +1,21 @@
-import { z } from 'zod'
-import { TsIoClientAdapter } from './adapter'
+import type { z } from 'zod'
+import type { TsIoClientAdapter } from './adapter'
 import {
-  AnyContractActions,
-  AnyContractListeners,
-  ContractAction,
-  ContractActions,
-  ContractListener,
-  ContractListeners,
-  ContractRouterType,
-  TActionWithAck,
-  TBaseAction,
+  type AnyContractActions,
+  type AnyContractListeners,
+  type ContractAction,
+  type ContractActions,
+  type ContractListener,
+  type ContractListeners,
+  type ContractRouterType,
+  type TActionWithAck,
+  type TBaseAction,
   isActionWithAck,
   isContractAction,
   isContractListener,
   isContractRouter,
 } from './contract'
-import { TResponse } from './types'
+import type { TResponse } from './types'
 
 type BasicAction<Action extends TBaseAction> = (
   body: z.infer<Action['input']>
