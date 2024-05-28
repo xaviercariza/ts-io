@@ -1,3 +1,5 @@
+import http from 'node:http'
+import type { AddressInfo } from 'node:net'
 import {
   type ContractPaths,
   type ContractRouterType,
@@ -7,8 +9,6 @@ import {
 } from '@tsio/core'
 import { createWsClientProxy } from '@tsio/ws/client'
 import { type TsIoWebSocket, type TsIoWebSocketServer, createWsServerProxy } from '@tsio/ws/server'
-import http from 'node:http'
-import type { AddressInfo } from 'node:net'
 import type ws from 'ws'
 import { WebSocket, WebSocketServer } from 'ws'
 
