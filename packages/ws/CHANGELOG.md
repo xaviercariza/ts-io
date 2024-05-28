@@ -1,5 +1,13 @@
 # @tsio/ws
 
+## 0.0.3
+
+### Patch Changes
+
+- 279545b:
+- Updated dependencies [279545b]
+  - @tsio/core@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes
