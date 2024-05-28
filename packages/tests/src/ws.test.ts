@@ -74,7 +74,7 @@ describe('ws', () => {
       }))
 
       // Attach router to socket
-      wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+      wsFixture.attachTsIoToWebSocket({ router, adapter: setup.server.adapter, createContext })
 
       // Run action
       const actionPayload = {
@@ -121,7 +121,7 @@ describe('ws', () => {
         }))
 
         // Attach router to socket
-        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        wsFixture.attachTsIoToWebSocket({ router, adapter: setup.server.adapter, createContext })
 
         // Prepare
         const emitToAdapter = vi.spyOn(setup.server.adapter, 'emitTo')
@@ -197,7 +197,7 @@ describe('ws', () => {
         }))
 
         // Attach router to socket
-        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        wsFixture.attachTsIoToWebSocket({ router, adapter: setup.server.adapter, createContext })
 
         // Prepare
         const actionPayload = {
@@ -250,7 +250,7 @@ describe('ws', () => {
         }))
 
         // Attach router to socket
-        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        wsFixture.attachTsIoToWebSocket({ router, adapter: setup.server.adapter, createContext })
 
         // Prepare
         const emitToAdapter = vi.spyOn(setup.server.adapter, 'emitTo')
@@ -325,7 +325,7 @@ describe('ws', () => {
         }))
 
         // Attach router to socket
-        wsFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        wsFixture.attachTsIoToWebSocket({ router, adapter: setup.server.adapter, createContext })
 
         // Prepare
         const actionPayload = {

@@ -1,12 +1,24 @@
-import { prisma } from '../prisma'
 import type { Response, UserProfile } from '../../types'
+import { prisma } from '../prisma'
 
-const searchUserChats = async (search: string): Promise<Response<UserProfile[]>> => {
+const searchUserChats = async (
+  search: string,
+  userNickname: string
+): Promise<Response<UserProfile[]>> => {
   const users = await prisma.user.findMany({
     where: {
-      nickname: {
-        contains: search,
-      },
+      AND: [
+        {
+          nickname: {
+            contains: search,
+          },
+        },
+        {
+          nickname: {
+            not: userNickname,
+          },
+        },
+      ],
     },
     select: {
       id: true,

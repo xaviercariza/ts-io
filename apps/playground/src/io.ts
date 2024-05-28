@@ -19,7 +19,7 @@ const createIOServer = (server: http.Server, sessionMiddleware: express.RequestH
       console.log(`A user connected ${socket.id}`)
 
       const adapter = createSocketIoServerAdapter(socket)
-      attachRouterToSocket(chatRouter, adapter, () => ({ user }))
+      attachRouterToSocket({ router: chatRouter, adapter, createContext: () => ({ user, socket }) })
 
       socket.on('disconnect', async () => {
         console.log(`user disconnected ${socket.id}`)

@@ -81,7 +81,11 @@ describe('socketio', () => {
         }))
 
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        socketIoFixture.attachTsIoToWebSocket({
+          router,
+          adapter: setup.server.adapter,
+          createContext,
+        })
 
         const actionPayload = {
           title: 'This is the title',
@@ -132,7 +136,11 @@ describe('socketio', () => {
         }))
 
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        socketIoFixture.attachTsIoToWebSocket({
+          router,
+          adapter: setup.server.adapter,
+          createContext,
+        })
 
         // Prepare
         const emitToAdapter = vi.spyOn(setup.server.adapter, 'emitTo')
@@ -217,7 +225,11 @@ describe('socketio', () => {
           listenersRouter: {},
         }))
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        socketIoFixture.attachTsIoToWebSocket({
+          router,
+          adapter: setup.server.adapter,
+          createContext,
+        })
         // Prepare
         const actionPayload = {
           title: 'This is the title',
@@ -269,7 +281,11 @@ describe('socketio', () => {
           listenersRouter: {},
         }))
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        socketIoFixture.attachTsIoToWebSocket({
+          router,
+          adapter: setup.server.adapter,
+          createContext,
+        })
         // Prepare
         const emitToAdapter = vi.spyOn(setup.server.adapter, 'emitTo')
         const actionPayload = {
@@ -344,7 +360,11 @@ describe('socketio', () => {
           listenersRouter: {},
         }))
         // Attach router to socket
-        socketIoFixture.attachTsIoToWebSocket(router, setup.server.adapter, createContext)
+        socketIoFixture.attachTsIoToWebSocket({
+          router,
+          adapter: setup.server.adapter,
+          createContext,
+        })
         // Prepare
         const actionPayload = {
           title: 'This is the title',

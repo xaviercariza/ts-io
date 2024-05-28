@@ -2,10 +2,11 @@
   "name": "@tsio/playground",
   "description": "tsio playground app",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "start": "ts-node src/server.ts",
-    "types-check": "tsc --noemit"
+    "types-check": "tsc --noemit",
+    "db:reset": "prisma migrate reset && prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",

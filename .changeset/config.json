@@ -3,7 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "privatePackages": false,
-  "fixed": [["@tsio/core", "@tsio/socketio", "@tsio/ws", "@tsio/tests"]],
+  "fixed": [["@tsio/core", "@tsio/socketio", "@tsio/ws", "@tsio/tests", "@tsio/playground"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",

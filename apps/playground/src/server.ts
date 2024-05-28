@@ -1,6 +1,6 @@
+import http from 'node:http'
 import express from 'express'
 import session from 'express-session'
-import http from 'node:http'
 import { createServer as createViteServer } from 'vite'
 import { createIOServer } from './io'
 import { getAllUser, getChats, getUser, searchUserChats, signIn } from './server/services'
@@ -88,7 +88,7 @@ async function createMainServer() {
 
     const { search } = req.params
 
-    const results = await searchUserChats(search as string)
+    const results = await searchUserChats(search as string, req.session.user.nickname)
     if (!results.success) {
       return res.send([])
     }

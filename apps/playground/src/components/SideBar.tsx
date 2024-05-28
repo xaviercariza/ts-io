@@ -1,5 +1,6 @@
+import clsx from 'clsx'
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import type { Group, UserProfile } from '../types'
 import { api } from '../utils/api'
 import { Avatar } from './Avatar'
@@ -92,7 +93,10 @@ export function SideBar({ user, onLoggedOut }: Props) {
                   key={c.id}
                   type="button"
                   onClick={handleConversationClicked(c.id)}
-                  className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
+                  className={clsx('flex flex-row items-center hover:bg-gray-100 rounded-xl p-2', {
+                    'bg-gray-100 text-blue-600 hover:cursor-default':
+                      chat.state.activeChat?.id === c.id,
+                  })}
                 >
                   <Avatar size="sm" nickname={otherUser.nickname} />
                   <div className="ml-2 text-sm font-semibold first-letter:uppercase">

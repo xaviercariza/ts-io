@@ -31,7 +31,8 @@
           }
         }
       }
-    },{
+    },
+    {
       "include": ["packages/tests/*"],
       "linter": {
         "rules": {

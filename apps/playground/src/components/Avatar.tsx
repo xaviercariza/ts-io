@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { getUserAvatarColor } from '../utils/color'
+import type { ReactNode } from 'react'
 
 type Size = 'sm' | 'md' | 'lg'
 
@@ -8,9 +9,10 @@ type Props = {
   size: Size
   displayName?: boolean
   className?: string
+  children?: ReactNode
 }
 
-export function Avatar({ nickname, size = 'md', displayName = false, className }: Props) {
+export function Avatar({ nickname, size = 'md', displayName = false, className, children }: Props) {
   const backgroundColor = getUserAvatarColor(nickname)
 
   return (
@@ -29,7 +31,10 @@ export function Avatar({ nickname, size = 'md', displayName = false, className }
       >
         {nickname.charAt(0).toUpperCase()}
       </div>
-      {displayName && <div className="ml-2 text-sm font-bold">{nickname}</div>}
+      <div className="ml-2 flex flex-col">
+        {displayName && <div className="text-sm font-bold">{nickname}</div>}
+        {children}
+      </div>
     </div>
   )
 }

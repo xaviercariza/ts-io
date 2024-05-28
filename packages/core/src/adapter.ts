@@ -60,11 +60,17 @@ const isRouter = (action: AnyRouter | AnyAction): action is AnyRouter => {
   return typeof action !== 'function'
 }
 
-const attachTsIoToWebSocket = <TContext>(
-  router: AnyRouter,
-  adapter: TsIoServerAdapter<any>,
+type AttachTsIoWebSocketParams<TContext> = {
+  router: AnyRouter
+  adapter: TsIoServerAdapter<any>
   createContext: () => TContext
-) => {
+}
+
+const attachTsIoToWebSocket = <TContext>({
+  router,
+  adapter,
+  createContext,
+}: AttachTsIoWebSocketParams<TContext>) => {
   function attach(subRouter: AnyRouter, path = '') {
     Object.keys(subRouter).forEach(key => {
       const actionKey = key as keyof typeof subRouter

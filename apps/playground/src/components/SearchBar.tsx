@@ -16,7 +16,7 @@ export function SearchBar<T extends Option>({ options, onSearch, onSelect }: Pro
   const searchBarRef = useRef<HTMLDivElement | null>(null)
   const searchButtonRef = useRef<HTMLInputElement | null>(null)
   const [userSearch, setUserSearch] = useState('')
-  const { debouncedValue } = useDebounce(userSearch, 500)
+  const debouncedValue = useDebounce(userSearch, 500)
   const [openSearch, setOpenSearch] = useState(false)
   const [searching, setSearching] = useState(false)
   useOnClickOutside(searchBarRef, () => setOpenSearch(false))
