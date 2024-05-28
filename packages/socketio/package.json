@@ -5,17 +5,25 @@
   "license": "MIT",
   "author": "Xavier Cardona",
   "version": "0.0.3",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
     "./client": {
       "import": "./dist/client.mjs",
       "require": "./dist/client.js",
-      "types": "./dist/client.d.ts"
+      "default": "./dist/client.js"
     },
     "./server": {
       "import": "./dist/server.mjs",
       "require": "./dist/server.js",
-      "types": "./dist/server.d.ts"
+      "default": "./dist/server.js"
     }
   },
   "scripts": {

@@ -1,3 +1,5 @@
+import { type Server, createServer } from 'node:http'
+import type { AddressInfo } from 'node:net'
 import {
   type ContractPaths,
   type ContractRouterType,
@@ -7,8 +9,6 @@ import {
 } from '@tsio/core'
 import { createSocketIoClientAdapter } from '@tsio/socketio/client'
 import { createSocketIoServerAdapter } from '@tsio/socketio/server'
-import { type Server, createServer } from 'node:http'
-import type { AddressInfo } from 'node:net'
 import { Server as IoServer, type Socket as TServerSocket } from 'socket.io'
 import { type Socket as TClientSocket, io as ioc } from 'socket.io-client'
 
