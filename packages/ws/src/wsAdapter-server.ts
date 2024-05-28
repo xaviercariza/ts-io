@@ -1,6 +1,7 @@
-import { ContractAction, TsIoServerAdapter, TsIoServerEmitter } from '@tsio/core'
+import type { ContractAction, TsIoServerAdapter, TsIoServerEmitter } from '@tsio/core'
 import { v4 as uuidv4 } from 'uuid'
-import ws, { WebSocketServer } from 'ws'
+import type ws from 'ws'
+import type { WebSocketServer } from 'ws'
 
 export type TsIoWebSocket = ws.WebSocket & { id?: string }
 

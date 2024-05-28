@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 type Props = { left?: ReactNode; right?: ReactNode }
 

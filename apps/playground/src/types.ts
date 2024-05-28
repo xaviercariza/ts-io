@@ -1,7 +1,7 @@
 import type { z } from 'zod'
-import type { MessageSchema, UserSchema } from './libs/tsio/schemas'
+import type { MessageSchema, UserSchema } from './server/tsio/schemas'
 
-import session from 'express-session'
+import type session from 'express-session'
 
 declare module 'express-session' {
   interface SessionData {

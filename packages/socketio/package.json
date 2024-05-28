@@ -22,20 +22,15 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
-    "types-check": "tsc --noemit",
-    "lint": "eslint .",
-    "lint:fix": "pnpm run lint --fix"
+    "types-check": "tsc --noemit"
   },
   "dependencies": {
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@tsio/eslint-config": "workspace:^",
     "@tsio/core": "workspace:^",
-    "@tsio/typescript-config": "workspace:^",
     "@types/node": "^20.11.24",
     "@types/uuid": "^9.0.8",
-    "eslint": "^8.57.0",
     "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4",
     "tsup": "^8.0.1",

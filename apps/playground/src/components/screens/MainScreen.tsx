@@ -14,10 +14,10 @@ export function MainScreen({ user, onLogOut }: Proops) {
 
   useEffect(() => {
     if (tsIo) {
-      const listener = tsIo.listeners.chat.onMessageReceived(message => {
+      const listener = tsIo.listeners.chat.onMessageReceived(newChat => {
         chat.dispatch({
-          type: 'ADD_MESSAGE',
-          payload: { groupId: message.group.id, message: message },
+          type: 'UPDATE_CHAT',
+          payload: { chat: newChat },
         })
       })
 
@@ -25,7 +25,7 @@ export function MainScreen({ user, onLogOut }: Proops) {
         listener.unsubscribe()
       }
     }
-  }, [])
+  }, [chat.dispatch, tsIo])
 
   return (
     <Layout>

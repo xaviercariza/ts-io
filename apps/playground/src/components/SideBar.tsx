@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import clsx from 'clsx'
+import type React from 'react'
+import { useEffect } from 'react'
 import type { Group, UserProfile } from '../types'
 import { api } from '../utils/api'
 import { Avatar } from './Avatar'
@@ -13,7 +15,7 @@ async function logOut() {
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include', // Ensure cookies are included with the request
+    credentials: 'include',
   })
 
   if (!res.success) {
@@ -25,13 +27,10 @@ async function logOut() {
 }
 
 export function SideBar({ user, onLoggedOut }: Props) {
-  const [loading, setLoading] = useState(false)
-  const [loadingChats, setLoadingChats] = useState(false)
   const chat = useChat()
 
   useEffect(() => {
     async function getChats() {
-      setLoadingChats(true)
       const res = await api<Group[]>('http://localhost:3010/api/chats', {
         method: 'GET',
         headers: {
@@ -43,11 +42,10 @@ export function SideBar({ user, onLoggedOut }: Props) {
       } else {
         chat.dispatch({ type: 'INIT', payload: { chats: res.data } })
       }
-      setLoadingChats(false)
     }
 
     getChats()
-  }, [user])
+  }, [chat.dispatch])
 
   const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -93,8 +91,12 @@ export function SideBar({ user, onLoggedOut }: Props) {
               return (
                 <button
                   key={c.id}
+                  type="button"
                   onClick={handleConversationClicked(c.id)}
-                  className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
+                  className={clsx('flex flex-row items-center hover:bg-gray-100 rounded-xl p-2', {
+                    'bg-gray-100 text-blue-600 hover:cursor-default':
+                      chat.state.activeChat?.id === c.id,
+                  })}
                 >
                   <Avatar size="sm" nickname={otherUser.nickname} />
                   <div className="ml-2 text-sm font-semibold first-letter:uppercase">

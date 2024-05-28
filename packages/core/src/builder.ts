@@ -1,15 +1,21 @@
-import { ZodType } from 'zod'
-import { Action, ActionCallOptions, ActionResolver, AnyAction, AnyActionResolver } from './action'
-import { ContractRouterType } from './contract'
+import type { ZodType } from 'zod'
+import type {
+  Action,
+  ActionCallOptions,
+  ActionResolver,
+  AnyAction,
+  AnyActionResolver,
+} from './action'
+import type { ContractRouterType } from './contract'
 import {
-  AnyMiddlewareFn,
-  AnyMiddlewareFunctionParams,
-  MiddlewareBuilder,
-  MiddlewareFunction,
-  MiddlewareResult,
+  type AnyMiddlewareFn,
+  type AnyMiddlewareFunctionParams,
+  type MiddlewareBuilder,
+  type MiddlewareFunction,
+  type MiddlewareResult,
   isMiddlewareResolver,
 } from './middleware'
-import { DefaultValue, Overwrite, ParseSchema, UnsetMarker } from './types'
+import type { DefaultValue, Overwrite, ParseSchema, UnsetMarker } from './types'
 import { mergeWithoutOverrides } from './utils'
 
 type ActionBuilderDef = {
@@ -138,7 +144,10 @@ function createActionCaller(_def: AnyActionBuilderDef): AnyAction {
       }
     ): Promise<MiddlewareResult<any>> {
       try {
-        const middleware = _def.middlewares[callOpts.index]!
+        const middleware = _def.middlewares[callOpts.index]
+        if (!middleware) {
+          throw new Error(`Middleware not found at position ${callOpts.index}`)
+        }
 
         const params: AnyMiddlewareFunctionParams = {
           ctx: callOpts.ctx,

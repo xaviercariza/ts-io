@@ -6,7 +6,7 @@ type Action =
   | { type: 'INIT'; payload: { chats: Group[] } }
   | { type: 'OPEN_CHAT'; payload: { chatKey: string } }
   | { type: 'START_CHAT'; payload: { user: UserProfile; otherUser: UserProfile } }
-  | { type: 'ADD_MESSAGE'; payload: { groupId: string; message: Message } }
+  | { type: 'UPDATE_CHAT'; payload: { chat: Group } }
 type Dispatch = (action: Action) => void
 type State = { chats: Record<string, Group>; activeChat: Group | null }
 type ChatProviderProps = { children: React.ReactNode }
@@ -18,7 +18,10 @@ function chatReducer(state: State, action: Action): State {
     case 'INIT': {
       return {
         ...state,
-        chats: action.payload.chats.reduce((acc, curr) => ({ ...acc, [curr.id]: curr }), {}),
+        chats: action.payload.chats.reduce<Record<string, Group>>((acc, curr) => {
+          acc[curr.id] = curr
+          return acc
+        }, {}),
       }
     }
     case 'OPEN_CHAT': {
@@ -42,23 +45,16 @@ function chatReducer(state: State, action: Action): State {
         activeChat: chat,
       }
     }
-    case 'ADD_MESSAGE': {
-      const group = state.chats[action.payload.groupId]
-      if (!group) {
-        throw new Error(`Cannot send a message to an unknown group ${action.payload.groupId}`)
-      }
+    case 'UPDATE_CHAT': {
+      const isActiveChat = action.payload.chat.id === state.activeChat?.id
 
-      const groupUpdated = {
-        ...group,
-        messages: [...group.messages, action.payload.message],
-      }
       return {
         ...state,
+        activeChat: isActiveChat ? action.payload.chat : state.activeChat,
         chats: {
           ...state.chats,
-          [group.id]: groupUpdated,
+          [action.payload.chat.id]: action.payload.chat,
         },
-        activeChat: groupUpdated,
       }
     }
     default: {
@@ -72,8 +68,6 @@ function ChatProvider({ children }: ChatProviderProps) {
     chats: {},
     activeChat: null,
   })
-  // NOTE: you *might* need to memoize this value
-  // Learn more in http://kcd.im/optimize-context
   const value = { state, dispatch }
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
 }

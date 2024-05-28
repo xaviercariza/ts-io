@@ -1,6 +1,6 @@
+import http from 'node:http'
 import express from 'express'
 import session from 'express-session'
-import http from 'http'
 import { createServer as createViteServer } from 'vite'
 import { createIOServer } from './io'
 import { getAllUser, getChats, getUser, searchUserChats, signIn } from './server/services'
@@ -13,12 +13,12 @@ async function createMainServer() {
 
   const sessionMiddleware = session({
     secret: 'changeit',
-    resave: false, // Avoid resaving session if unmodified
-    saveUninitialized: false, // Don't save an uninitialized session
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-      httpOnly: true, // Prevents client side JS from reading the cookie
-      secure: process.env.NODE_ENV === 'production', // Ensures cookies are sent over HTTPS
-      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 
@@ -35,7 +35,7 @@ async function createMainServer() {
       return res.status(result.code).send(result.error)
     }
     if (req.session) {
-      req.session.user = result.data // Set user in session
+      req.session.user = result.data
     }
     return res.status(200).send(result.data)
   })
@@ -52,9 +52,8 @@ async function createMainServer() {
   app.get('/api/session', (req, res) => {
     if (req.session?.user) {
       return res.send(req.session.user)
-    } else {
-      return res.status(401).send({ loggedIn: false })
     }
+    return res.status(401).send({ loggedIn: false })
   })
   app.post('/api/nickname', async (req, res) => {
     const { nickname } = req.body
@@ -89,7 +88,7 @@ async function createMainServer() {
 
     const { search } = req.params
 
-    const results = await searchUserChats(req.session.user.id, search as string)
+    const results = await searchUserChats(search as string, req.session.user.nickname)
     if (!results.success) {
       return res.send([])
     }

@@ -1,11 +1,11 @@
-import React, { useState, type ChangeEvent } from 'react'
+import type React from 'react'
+import { useState, type ChangeEvent } from 'react'
 import type { User } from '../../types'
-import { Button } from '../Button'
-import { Card } from '../Card'
-import { Input } from '../Input'
-import { Spinner } from '../Spinner'
 import { api } from '../../utils/api'
+import { Button } from '../Button'
+import { Input } from '../Input'
 import { Layout } from '../Layout'
+import { Spinner } from '../Spinner'
 
 type Props = {
   onSignUp: (user: User) => void
@@ -15,7 +15,7 @@ async function checkNicknameAvailability(nickname: string) {
   return await api<boolean>('http://localhost:3010/api/nickname', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json', // Ensures the server treats the incoming body as JSON
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ nickname }),
   })
@@ -25,7 +25,7 @@ async function registerUser(nickname: string, password: string) {
   return await api<User>('http://localhost:3010/api/login', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json', // Ensures the server treats the incoming body as JSON
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ nickname, password }),
   })
@@ -114,6 +114,7 @@ export function WelcomeScreen({ onSignUp }: Props) {
                   width="1em"
                   className="w-6 h-6"
                 >
+                  <title>Submit nickname</title>
                   <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zm-3.97-3.03a.75.75 0 00-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 00-1.06 1.06L6.97 11.03a.75.75 0 001.079-.02l3.992-4.99a.75.75 0 00-.01-1.05z" />
                 </svg>
               )}

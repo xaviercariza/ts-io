@@ -1,4 +1,7 @@
-import React, { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import type React from 'react'
+import { type ChangeEvent, useEffect, useRef, useState } from 'react'
+import { useDebounce } from '../hooks/useDebounce'
+import { useUserIsTyping } from '../hooks/useUserTyping'
 import type { UserProfile } from '../types'
 import { Avatar } from './Avatar'
 import { Button } from './Button'
@@ -17,6 +20,7 @@ export function Chat({ user }: Props) {
   const messagesContainerRef = useRef<HTMLDivElement | null>(null)
   const chat = useChat()
   const [text, setText] = useState('')
+  const { userTyping } = useUserIsTyping(chat.state.activeChat?.id, user.id, !!text)
   const [sendingMessage, setSendingMessage] = useState(false)
   const otherUser = chat.state.activeChat?.users?.find(u => u.id !== user.id)
 
@@ -36,16 +40,22 @@ export function Chat({ user }: Props) {
 
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const group = chat.state.activeChat
-    if (tsIo && group && otherUser && text.trim()) {
+    const activeChat = chat.state.activeChat
+    if (tsIo && activeChat && otherUser && text.trim()) {
       setSendingMessage(true)
       const result = await tsIo.actions.chat.sendMessage({
+        chatId: activeChat.id,
         text,
         senderId: user.id,
         receiverId: otherUser.id,
       })
       if (result.success) {
-        chat.dispatch({ type: 'ADD_MESSAGE', payload: { groupId: group.id, message: result.data } })
+        chat.dispatch({
+          type: 'UPDATE_CHAT',
+          payload: {
+            chat: result.data,
+          },
+        })
         setText('')
       }
       setSendingMessage(false)
@@ -57,12 +67,17 @@ export function Chat({ user }: Props) {
       <Card
         header={<Header right={<SearchAction user={user} />} />}
         fullScreen
-        // className="flex items-center justify-center"
         className="overflow-hidden relative"
       >
         <div className="absolute inset-0 h-full pattern-dots" />
         <div className="w-full h-full flex flex-col items-center justify-center">
-          <img width="30%" height="30%" src="/images/empty_folder.webp" className="opacity-25" />
+          <img
+            alt="no active chat"
+            width="30%"
+            height="30%"
+            src="/images/empty_folder.webp"
+            className="opacity-25"
+          />
           <span className="text-2xl text-slate-300 font-bold">No conversation started yet</span>
         </div>
       </Card>
@@ -75,7 +90,11 @@ export function Chat({ user }: Props) {
     <Card
       header={
         <Header
-          left={<Avatar displayName nickname={otherUser.nickname} size="md" />}
+          left={
+            <Avatar displayName nickname={otherUser.nickname} size="md">
+              <span className="text-slate-300 text-xs">{userTyping ? 'Typing...' : ''}</span>
+            </Avatar>
+          }
           right={<SearchAction user={user} />}
         />
       }
@@ -84,13 +103,13 @@ export function Chat({ user }: Props) {
     >
       <div
         ref={messagesContainerRef}
-        className="z-40 flex-1 grid grid-cols-12 gap-y-2 overflow-x-hidden overflow-y-auto"
+        className="z-40 flex-1 flex flex-col gap-y-2 overflow-x-hidden overflow-y-auto"
       >
         {chat.state.activeChat.messages.map(msg => {
           const isSendFromUser = msg.senderId === user.id
           if (isSendFromUser) {
             return (
-              <div key={msg.id} className="col-start-6 col-end-13 p-3 rounded-lg">
+              <div key={msg.id} className="col-start-6 col-end-13 p-3 rounded-lg self-end">
                 <div className="flex items-center justify-start flex-row-reverse">
                   <Avatar size="sm" nickname={msg.sender.nickname} />
                   <div className="w-full relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl">
@@ -102,7 +121,7 @@ export function Chat({ user }: Props) {
           }
 
           return (
-            <div key={msg.id} className="col-start-1 col-end-8 p-3 rounded-lg">
+            <div key={msg.id} className="col-start-1 col-end-8 p-3 rounded-lg self-start">
               <div className="flex flex-row items-center">
                 <Avatar size="sm" nickname={msg.receiver.nickname} />
                 <div className="w-full relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl">
@@ -119,7 +138,13 @@ export function Chat({ user }: Props) {
         className="z-40 flex flex-row items-center h-16 rounded-xl bg-white w-full p-4 shadow-sm"
       >
         <div className="flex-grow">
-          <Input autoFocus fullWidth value={text} onChange={handleTextChange} />
+          <Input
+            autoFocus
+            fullWidth
+            placeholder="Message..."
+            value={text}
+            onChange={handleTextChange}
+          />
         </div>
 
         <div className="ml-4">
@@ -136,12 +161,13 @@ export function Chat({ user }: Props) {
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
+                  <title>Send message</title>
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
                     d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  ></path>
+                  />
                 </svg>
               )}
             </span>

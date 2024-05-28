@@ -1,5 +1,5 @@
 import { attachTsIoToWebSocket } from './adapter'
-import { ContractRouterType } from './contract'
+import type { ContractRouterType } from './contract'
 import { createMiddlewareFactory } from './middleware'
 import { createRouterFactory } from './router'
 

@@ -6,16 +6,12 @@
   "scripts": {
     "prettier": "prettier --write src/**/*.ts --config ../../prettier.config.cjs",
     "types-check": "tsc --noemit",
-    "lint": "eslint .",
-    "lint:fix": "pnpm run lint --fix",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@tsio/core": "workspace:^",
-    "@tsio/eslint-config": "workspace:*",
     "@tsio/socketio": "workspace:^",
-    "@tsio/typescript-config": "workspace:*",
     "@tsio/ws": "workspace:^",
     "@types/node": "20.10.0",
     "@types/ws": "^8.5.10",

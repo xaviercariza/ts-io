@@ -1,4 +1,4 @@
-import { prisma } from '../../libs/prisma'
+import { prisma } from '../prisma'
 import type { Response, UserProfile } from '../../types'
 
 const getAllUser = async (filterByNickname?: string): Promise<Response<UserProfile[]>> => {

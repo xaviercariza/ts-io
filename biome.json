@@ -1,0 +1,49 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
+  "organizeImports": { "enabled": true },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noForEach": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
+      }
+    },
+    "include": ["apps/**", "packages/**"],
+    "ignore": [
+      "prettier.config.cjs",
+      "lint-staged.config.mjs",
+      "dist/*",
+      "node_modules/*",
+      ".next/*"
+    ]
+  },
+  "overrides": [
+    {
+      "include": ["packages/core/*"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noAccumulatingSpread": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["packages/tests/*"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noEmptyPattern": "off"
+          }
+        }
+      }
+    }
+  ],
+  "formatter": {
+    "enabled": false
+  }
+}

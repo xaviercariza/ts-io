@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import { twMerge } from 'tailwind-merge'
 
 type Props = React.SVGProps<SVGSVGElement>
@@ -10,6 +10,7 @@ export function Spinner({ className, ...rest }: Props) {
       viewBox="0 0 100 100"
       {...rest}
     >
+      <title>Loading spinner</title>
       <circle
         fill="none"
         stroke-width="10"

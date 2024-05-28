@@ -1,23 +1,20 @@
 {
-  "extends": "@tsio/typescript-config/nextjs.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "lib": ["dom", "DOM.Iterable", "ES2022"],
+    "jsx": "preserve",
     "incremental": true
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "theme.config.jsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "theme.config.jsx"],
+  "exclude": ["node_modules"]
 }

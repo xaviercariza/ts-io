@@ -13,8 +13,6 @@
     },
     "prettier": {},
     "types-check": {},
-    "lint": {},
-    "lint:fix": {},
     "test": {}
   }
 }

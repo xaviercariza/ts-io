@@ -1,4 +1,3 @@
-/* eslint-disable no-empty-pattern */
 import { attachTsIoToWebSocket } from '@tsio/core'
 import { test } from 'vitest'
 import { setupSocketIo } from './socketio'

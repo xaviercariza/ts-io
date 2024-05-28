@@ -1,6 +1,6 @@
-import { ValueAtPath } from './contract'
-import { ContractListener, ContractPaths, ContractRouterType } from './contract'
-import { ParseSchema } from './types'
+import type { ValueAtPath } from './contract'
+import type { ContractListener, ContractPaths, ContractRouterType } from './contract'
+import type { ParseSchema } from './types'
 
 type AnyEmitEventToFunction = EmitEventToFunction<any>
 
